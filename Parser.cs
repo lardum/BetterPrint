@@ -6,9 +6,8 @@ namespace BetterPrint;
 
 public class Parser(string path)
 {
-    private readonly int _len = path.Length;
     private readonly byte[] _fileBytes = File.ReadAllBytes(path);
-    private int _cursor = 0;
+    private int _cursor;
 
     // https://learn.microsoft.com/en-us/windows/win32/debug/pe-format
     // https://www.ecma-international.org/wp-content/uploads/ECMA-335_6th_edition_june_2012.pdf
@@ -24,9 +23,15 @@ public class Parser(string path)
         parsedIl.Add("pe_file_header", new IlRecord(TokenType.ByteText, _cursor, GetNext(4)));
         parsedIl.Add("machine", new IlRecord(TokenType.Bytes, _cursor, GetNext(2)));
         parsedIl.Add("number_of_sections", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
+        parsedIl.Add("time_date_stamp", new IlRecord(TokenType.DateTime, _cursor, GetNext(4)));
+        parsedIl.Add("pointer_to_symbol_table", new IlRecord(TokenType.Int, _cursor, GetNext(4)));
+        parsedIl.Add("number_of_symbols", new IlRecord(TokenType.Int, _cursor, GetNext(4)));
+        parsedIl.Add("optional_header_size", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
+        parsedIl.Add("characteristics", new IlRecord(TokenType.Binary, _cursor, GetNext(2)));
 
-        // Console.WriteLine(JsonSerializer.Serialize(parsedIl, new JsonSerializerOptions { WriteIndented = true }));
-        Console.WriteLine(parsedIl["number_of_sections"].GetValue());
+        Console.WriteLine(parsedIl["time_date_stamp"].GetValue());
+        Console.WriteLine(parsedIl["optional_header_size"].GetValue());
+        Console.WriteLine(parsedIl["characteristics"].GetValue());
     }
 
     private byte[] GetNext(int len = 1)
@@ -35,38 +40,44 @@ public class Parser(string path)
         _cursor += len;
         return bts;
     }
-
-    private short ReadInt16(byte[] bytes) => BinaryPrimitives.ReadInt16BigEndian(bytes);
 }
 
-static class Consts
+internal record IlRecord(TokenType Type, int Index, byte[] Value)
 {
-    public class PeParts
-    {
-        public const string DosHeader = "dos_header";
-    }
-}
-
-record IlRecord(TokenType Type, int Index, byte[] Value)
-{
-    public string ValueAsciiString() => Encoding.ASCII.GetString(Value);
+    private string ValueAsciiString() => Encoding.ASCII.GetString(Value);
+    private string ValueBitString() => string.Join(" ", Value.Select(x => x.ToString("B")));
     public string ValueHexString() => string.Join(" ", Value.Select(x => x.ToString("X")));
-    public string ValueBitString() => string.Join(" ", Value.Select(x => x.ToString("B")));
 
     public string GetValue()
     {
-        if (Type == TokenType.Short)
+        switch (Type)
         {
-            return BinaryPrimitives.ReadInt16LittleEndian(Value).ToString();
+            case TokenType.Binary:
+                return ValueBitString();
+            case TokenType.Short:
+                return BinaryPrimitives.ReadInt16LittleEndian(Value).ToString();
+            case TokenType.Int:
+                return BinaryPrimitives.ReadInt32LittleEndian(Value).ToString();
+            case TokenType.DateTime:
+            {
+                var intValue = BinaryPrimitives.ReadInt32BigEndian(Value); // WHY HERE IS BIG ENDIAN???
+                var dateTimeValue = new DateTime(1970, 1, 1).AddSeconds(intValue);
+                return dateTimeValue.ToString("u");
+            }
+            case TokenType.Bytes:
+            case TokenType.ByteText:
+            default:
+                return ValueAsciiString();
         }
-
-        return ValueAsciiString();
     }
 }
 
 internal enum TokenType
 {
+    Binary,
     Bytes,
     ByteText,
+    Int,
     Short,
+    DateTime,
 }
