@@ -58,7 +58,7 @@ public class Parser(string path)
     {
         Console.WriteLine(string.Join(", ",
             Consts.ParseFlags(parsedIl["pe_file_header"]["characteristics"].Value, Consts.CharacteristicsFlag)));
-        Console.WriteLine(JsonSerializer.Serialize(parsedIl));
+        Console.WriteLine(JsonSerializer.Serialize(parsedIl, new JsonSerializerOptions { WriteIndented = true }));
     }
 }
 
