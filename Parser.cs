@@ -14,24 +14,21 @@ public class Parser(string path)
     // II.25.2.1 MS-DOS header
     public void Parse()
     {
-        var parsedIl = new Dictionary<string, IlRecord>();
-        parsedIl.Add(Consts.PeParts.DosHeader, new IlRecord(TokenType.ByteText, _cursor, GetNext(128)));
+        var il = new Dictionary<string, IlRecord>();
+        il.Add(Consts.PeParts.DosHeader, new IlRecord(TokenType.ByteText, _cursor, GetNext(128)));
 
         var lfanewOffset = BinaryPrimitives.ReadUInt32LittleEndian(_fileBytes.Skip(60).Take(4).ToArray());
         if (lfanewOffset != 128) Console.WriteLine($"Wrong offset {lfanewOffset}");
 
-        parsedIl.Add("pe_file_header", new IlRecord(TokenType.ByteText, _cursor, GetNext(4)));
-        parsedIl.Add("machine", new IlRecord(TokenType.Bytes, _cursor, GetNext(2)));
-        parsedIl.Add("number_of_sections", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
-        parsedIl.Add("time_date_stamp", new IlRecord(TokenType.DateTime, _cursor, GetNext(4)));
-        parsedIl.Add("pointer_to_symbol_table", new IlRecord(TokenType.Int, _cursor, GetNext(4)));
-        parsedIl.Add("number_of_symbols", new IlRecord(TokenType.Int, _cursor, GetNext(4)));
-        parsedIl.Add("optional_header_size", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
-        parsedIl.Add("characteristics", new IlRecord(TokenType.Binary, _cursor, GetNext(2)));
-
-        Console.WriteLine(parsedIl["time_date_stamp"].GetValue());
-        Console.WriteLine(parsedIl["optional_header_size"].GetValue());
-        Console.WriteLine(parsedIl["characteristics"].GetValue());
+        il.Add("pe_file_header", new IlRecord(TokenType.ByteText, _cursor, GetNext(4)));
+        il.Add("machine", new IlRecord(TokenType.Bytes, _cursor, GetNext(2)));
+        il.Add("number_of_sections", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
+        il.Add("time_date_stamp", new IlRecord(TokenType.DateTime, _cursor, GetNext(4)));
+        il.Add("pointer_to_symbol_table", new IlRecord(TokenType.Int, _cursor, GetNext(4)));
+        il.Add("number_of_symbols", new IlRecord(TokenType.Int, _cursor, GetNext(4)));
+        il.Add("optional_header_size", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
+        il.Add("characteristics", new IlRecord(TokenType.Binary, _cursor, GetNext(2)));
+        PrintDebug(il);
     }
 
     private byte[] GetNext(int len = 1)
@@ -40,13 +37,18 @@ public class Parser(string path)
         _cursor += len;
         return bts;
     }
+
+    private void PrintDebug(Dictionary<string, IlRecord> parsedIl)
+    {
+        Console.WriteLine(string.Join(", ", Consts.ParseFlags(parsedIl["characteristics"].Value, Consts.CharacteristicsFlag)));
+    }
 }
 
 internal record IlRecord(TokenType Type, int Index, byte[] Value)
 {
     private string ValueAsciiString() => Encoding.ASCII.GetString(Value);
-    private string ValueBitString() => string.Join(" ", Value.Select(x => x.ToString("B")));
-    public string ValueHexString() => BitConverter.ToString(Value);
+    private string ValueBitString() => string.Join(" ", Value.Reverse().Select(x => x.ToString("B")));
+    public string ValueHexString() => BitConverter.ToString(Value.Reverse().ToArray());
 
     public string GetValue()
     {
@@ -59,15 +61,14 @@ internal record IlRecord(TokenType Type, int Index, byte[] Value)
             case TokenType.Int:
                 return BinaryPrimitives.ReadInt32LittleEndian(Value).ToString();
             case TokenType.DateTime:
-            {
                 var uintValue = BinaryPrimitives.ReadUInt32LittleEndian(Value);
                 var dateTimeValue = DateTimeOffset.FromUnixTimeSeconds(uintValue).UtcDateTime;
                 return dateTimeValue.ToString("u"); // Calc is not working but the bytes are correct
-            }
             case TokenType.Bytes:
             case TokenType.ByteText:
-            default:
                 return ValueAsciiString();
+            default:
+                return ValueHexString();
         }
     }
 }
