@@ -17,8 +17,8 @@ public class Parser(string path)
         var parsedIl = new Dictionary<string, IlRecord>();
         parsedIl.Add(Consts.PeParts.DosHeader, new IlRecord(TokenType.ByteText, _cursor, GetNext(128)));
 
-        var lfanewOffset = BinaryPrimitives.ReadInt32LittleEndian(_fileBytes.Skip(60).Take(4).ToArray());
-        if (lfanewOffset != 128) throw new Exception("Wrong offset");
+        var lfanewOffset = BinaryPrimitives.ReadUInt32LittleEndian(_fileBytes.Skip(60).Take(4).ToArray());
+        if (lfanewOffset != 128) Console.WriteLine($"Wrong offset {lfanewOffset}");
 
         parsedIl.Add("pe_file_header", new IlRecord(TokenType.ByteText, _cursor, GetNext(4)));
         parsedIl.Add("machine", new IlRecord(TokenType.Bytes, _cursor, GetNext(2)));
@@ -46,7 +46,7 @@ internal record IlRecord(TokenType Type, int Index, byte[] Value)
 {
     private string ValueAsciiString() => Encoding.ASCII.GetString(Value);
     private string ValueBitString() => string.Join(" ", Value.Select(x => x.ToString("B")));
-    public string ValueHexString() => string.Join(" ", Value.Select(x => x.ToString("X")));
+    public string ValueHexString() => BitConverter.ToString(Value);
 
     public string GetValue()
     {
@@ -60,9 +60,9 @@ internal record IlRecord(TokenType Type, int Index, byte[] Value)
                 return BinaryPrimitives.ReadInt32LittleEndian(Value).ToString();
             case TokenType.DateTime:
             {
-                var intValue = BinaryPrimitives.ReadInt32BigEndian(Value); // WHY HERE IS BIG ENDIAN???
-                var dateTimeValue = new DateTime(1970, 1, 1).AddSeconds(intValue);
-                return dateTimeValue.ToString("u");
+                var uintValue = BinaryPrimitives.ReadUInt32LittleEndian(Value);
+                var dateTimeValue = DateTimeOffset.FromUnixTimeSeconds(uintValue).UtcDateTime;
+                return dateTimeValue.ToString("u"); // Calc is not working but the bytes are correct
             }
             case TokenType.Bytes:
             case TokenType.ByteText:
