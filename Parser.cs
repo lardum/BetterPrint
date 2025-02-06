@@ -14,21 +14,37 @@ public class Parser(string path)
     // II.25.2.1 MS-DOS header
     public void Parse()
     {
-        var il = new Dictionary<string, IlRecord>();
-        il.Add(Consts.PeParts.DosHeader, new IlRecord(TokenType.ByteText, _cursor, GetNext(128)));
+        var il = new Dictionary<string, Dictionary<string, IlRecord>>();
+        il.Add(Consts.PeParts.DosHeader, ParseDosHeader());
+        il.Add("pe_file_header", ParsePeFileHeader());
+        PrintDebug(il);
+    }
+
+    private Dictionary<string, IlRecord> ParseDosHeader()
+    {
+        return new Dictionary<string, IlRecord>
+        {
+            { Consts.PeParts.DosHeader, new IlRecord(TokenType.ByteText, _cursor, GetNext(128)) }
+        };
+    }
+
+    private Dictionary<string, IlRecord> ParsePeFileHeader()
+    {
+        var peFileHeader = new Dictionary<string, IlRecord>();
 
         var lfanewOffset = BinaryPrimitives.ReadUInt32LittleEndian(_fileBytes.Skip(60).Take(4).ToArray());
         if (lfanewOffset != 128) Console.WriteLine($"Wrong offset {lfanewOffset}");
 
-        il.Add("pe_file_header", new IlRecord(TokenType.ByteText, _cursor, GetNext(4)));
-        il.Add("machine", new IlRecord(TokenType.Bytes, _cursor, GetNext(2)));
-        il.Add("number_of_sections", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
-        il.Add("time_date_stamp", new IlRecord(TokenType.DateTime, _cursor, GetNext(4)));
-        il.Add("pointer_to_symbol_table", new IlRecord(TokenType.Int, _cursor, GetNext(4)));
-        il.Add("number_of_symbols", new IlRecord(TokenType.Int, _cursor, GetNext(4)));
-        il.Add("optional_header_size", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
-        il.Add("characteristics", new IlRecord(TokenType.Binary, _cursor, GetNext(2)));
-        PrintDebug(il);
+        peFileHeader.Add("pe_singature", new IlRecord(TokenType.ByteText, _cursor, GetNext(4)));
+        peFileHeader.Add("machine", new IlRecord(TokenType.Bytes, _cursor, GetNext(2)));
+        peFileHeader.Add("number_of_sections", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
+        peFileHeader.Add("time_date_stamp", new IlRecord(TokenType.DateTime, _cursor, GetNext(4)));
+        peFileHeader.Add("pointer_to_symbol_table", new IlRecord(TokenType.Int, _cursor, GetNext(4)));
+        peFileHeader.Add("number_of_symbols", new IlRecord(TokenType.Int, _cursor, GetNext(4)));
+        peFileHeader.Add("optional_header_size", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
+        peFileHeader.Add("characteristics", new IlRecord(TokenType.Binary, _cursor, GetNext(2)));
+
+        return peFileHeader;
     }
 
     private byte[] GetNext(int len = 1)
@@ -38,9 +54,11 @@ public class Parser(string path)
         return bts;
     }
 
-    private void PrintDebug(Dictionary<string, IlRecord> parsedIl)
+    private void PrintDebug(Dictionary<string, Dictionary<string, IlRecord>> parsedIl)
     {
-        Console.WriteLine(string.Join(", ", Consts.ParseFlags(parsedIl["characteristics"].Value, Consts.CharacteristicsFlag)));
+        Console.WriteLine(string.Join(", ",
+            Consts.ParseFlags(parsedIl["pe_file_header"]["characteristics"].Value, Consts.CharacteristicsFlag)));
+        Console.WriteLine(JsonSerializer.Serialize(parsedIl));
     }
 }
 

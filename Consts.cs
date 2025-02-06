@@ -20,7 +20,6 @@ static class Consts
     public static List<string> ParseFlags(byte[] flags, List<(string name, int value)> definedFlags)
     {
         var flagsIntValue = BinaryPrimitives.ReadUInt16LittleEndian(flags);
-        Console.WriteLine("HALO" + flagsIntValue);
         return definedFlags
             .Where(x => (x.value & flagsIntValue) != 0)
             .Select(x => x.name)
