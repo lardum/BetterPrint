@@ -60,22 +60,24 @@ public class Parser(string path)
             { "size_of_uninitialized_data", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
             { "entry_point_rva", new IlRecord(TokenType.Bytes, _cursor, GetNext(4)) },
             { "base_of_code", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "base_of_data", new IlRecord(TokenType.Int, _cursor, GetNext(4)) }
+            { "base_of_data", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "nt_fields", new IlRecord(TokenType.Bytes, _cursor, GetNext(68)) },
+            { "data_directories", new IlRecord(TokenType.Bytes, _cursor, GetNext(128)) }
         };
 
         return optionalHeader;
     }
 
-    // To verify
     private Dictionary<string, IlRecord> ParseSectionHeaders(IlRecord numberOfSectionsRecord)
     {
         var sectionHeaders = new Dictionary<string, IlRecord>();
-        int numSections = int.Parse(numberOfSectionsRecord.GetReadableValue());
+        var numSections = int.Parse(numberOfSectionsRecord.GetReadableValue());
 
-        for (int i = 0; i < numSections; i++)
+        for (var i = 0; i < numSections; i++)
         {
-            string sectionName = Encoding.ASCII.GetString(GetNext(8)).Trim('\0');
-            sectionHeaders.Add(sectionName, new IlRecord(TokenType.ByteText, _cursor, GetNext(40)));
+            var sectionBytes = GetNext(40);
+            var sectionName = Encoding.ASCII.GetString(sectionBytes[..8]).Trim('\0');
+            sectionHeaders.Add(sectionName, new IlRecord(TokenType.Bytes, _cursor, sectionBytes));
         }
 
         return sectionHeaders;
