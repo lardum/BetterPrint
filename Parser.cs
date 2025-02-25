@@ -9,6 +9,7 @@ public class Parser(string path)
 {
     private readonly byte[] _fileBytes = File.ReadAllBytes(path);
     private int _cursor;
+    private const bool Debug = true;
 
     public void Parse()
     {
@@ -70,17 +71,51 @@ public class Parser(string path)
 
     private Dictionary<string, IlRecord> ParseSectionHeaders(IlRecord numberOfSectionsRecord)
     {
+        var localCursor = 0;
         var sectionHeaders = new Dictionary<string, IlRecord>();
         var numSections = int.Parse(numberOfSectionsRecord.GetReadableValue());
 
+        byte[] sectionBytes;
         for (var i = 0; i < numSections; i++)
         {
-            var sectionBytes = GetNext(40);
+            localCursor = 0;
+            var index = _cursor;
+            sectionBytes = GetNext(40);
+            var nameBytes = GetNextLocal(8);
             var sectionName = Encoding.ASCII.GetString(sectionBytes[..8]).Trim('\0');
-            sectionHeaders.Add(sectionName, new IlRecord(TokenType.Bytes, _cursor, sectionBytes));
+
+            var sectionDetails = new Dictionary<string, IlRecord>
+            {
+                { "name", new IlRecord(TokenType.ByteText, index + localCursor - 8, nameBytes) },
+                { "virtual_size", new IlRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
+                { "virtual_address", new IlRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
+                { "size_of_raw_data", new IlRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
+                { "pointer_to_raw_data", new IlRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
+                { "pointer_to_relocations", new IlRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
+                { "pointer_to_linenumbers", new IlRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
+                { "number_of_relocations", new IlRecord(TokenType.Int, index + localCursor, GetNextLocal(2)) },
+                { "number_of_linenumbers", new IlRecord(TokenType.Int, index + localCursor, GetNextLocal(2)) },
+                { "characteristics", new IlRecord(TokenType.Binary, index + localCursor, GetNextLocal(4)) }
+            };
+
+            if (Debug)
+            {
+                var characteristics = sectionDetails["characteristics"];
+                var flags = Consts.ParseFlags(characteristics.Value, Consts.SectionHeaderCharacteristics);
+                Console.WriteLine(string.Join(", ", flags));
+            }
+
+            sectionHeaders.Add(sectionName, new IlRecord(TokenType.Bytes, _cursor, sectionBytes, sectionDetails));
         }
 
         return sectionHeaders;
+
+        byte[] GetNextLocal(int len = 1)
+        {
+            var bts = sectionBytes.Skip(localCursor).Take(len).ToArray();
+            localCursor += len;
+            return bts;
+        }
     }
 
     private byte[] GetNext(int len = 1)
@@ -93,12 +128,12 @@ public class Parser(string path)
     private void PrintDebug(Dictionary<string, Dictionary<string, IlRecord>> parsedIl)
     {
         Console.WriteLine(string.Join(", ",
-            Consts.ParseFlags(parsedIl["pe_file_header"]["characteristics"].Value, Consts.CharacteristicsFlag)));
+            Consts.ParseFlags(parsedIl["pe_file_header"]["characteristics"].Value, Consts.PeFileHeaderCharacteristics)));
         Console.WriteLine(JsonSerializer.Serialize(parsedIl, new JsonSerializerOptions { WriteIndented = true }));
     }
 }
 
-internal record IlRecord(TokenType Type, int Index, byte[] Value)
+internal record IlRecord(TokenType Type, int Index, byte[] Value, Dictionary<string, IlRecord>? Children = null)
 {
     private string ValueAsciiString() => Encoding.ASCII.GetString(Value);
     private string ValueBitString() => string.Join(" ", Value.Reverse().Select(x => x.ToString("B")));
