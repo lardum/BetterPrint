@@ -5,6 +5,7 @@ using System.Text.Json;
 namespace BetterPrint;
 
 // https://www.ecma-international.org/wp-content/uploads/ECMA-335_6th_edition_june_2012.pdf
+// https://www.cybb0rg.com/2024/07/20/pe-headers-and-sections-explained/
 public class Parser(string path)
 {
     private readonly byte[] _fileBytes = File.ReadAllBytes(path);
@@ -18,6 +19,9 @@ public class Parser(string path)
         il.Add("pe_file_header", ParsePeFileHeader());
         il.Add("optional_header", ParseOptionalHeader());
         il.Add("sections", ParseSectionHeaders(il["pe_file_header"]["number_of_sections"]));
+
+        var codeSection = il["sections"][".text"];
+        ExecuteCode(codeSection);
 
         PrintDebug(il);
     }
@@ -73,7 +77,7 @@ public class Parser(string path)
     {
         var localCursor = 0;
         var sectionHeaders = new Dictionary<string, IlRecord>();
-        var numSections = int.Parse(numberOfSectionsRecord.GetReadableValue());
+        var numSections = numberOfSectionsRecord.ShortValue;
 
         byte[] sectionBytes;
         for (var i = 0; i < numSections; i++)
@@ -93,8 +97,8 @@ public class Parser(string path)
                 { "pointer_to_raw_data", new IlRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
                 { "pointer_to_relocations", new IlRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
                 { "pointer_to_linenumbers", new IlRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
-                { "number_of_relocations", new IlRecord(TokenType.Int, index + localCursor, GetNextLocal(2)) },
-                { "number_of_linenumbers", new IlRecord(TokenType.Int, index + localCursor, GetNextLocal(2)) },
+                { "number_of_relocations", new IlRecord(TokenType.Short, index + localCursor, GetNextLocal(2)) },
+                { "number_of_linenumbers", new IlRecord(TokenType.Short, index + localCursor, GetNextLocal(2)) },
                 { "characteristics", new IlRecord(TokenType.Binary, index + localCursor, GetNextLocal(4)) }
             };
 
@@ -118,6 +122,11 @@ public class Parser(string path)
         }
     }
 
+    private void ExecuteCode(IlRecord code)
+    {
+        var pointerToRawData = code.Children!["pointer_to_raw_data"].IntValue;
+    }
+
     private byte[] GetNext(int len = 1)
     {
         var bts = _fileBytes.Skip(_cursor).Take(len).ToArray();
@@ -139,9 +148,8 @@ internal record IlRecord(TokenType Type, int Index, byte[] Value, Dictionary<str
     private string ValueBitString() => string.Join(" ", Value.Reverse().Select(x => x.ToString("B")));
     public string ValueHexString() => BitConverter.ToString(Value.Reverse().ToArray());
 
-    public string GetReadableValue()
-    {
-        return Type switch
+    public string StringValue
+        => Type switch
         {
             TokenType.Binary => ValueBitString(),
             TokenType.Byte => Value[0].ToString(),
@@ -152,7 +160,9 @@ internal record IlRecord(TokenType Type, int Index, byte[] Value, Dictionary<str
             TokenType.Bytes => ValueHexString(),
             _ => ValueHexString(),
         };
-    }
+
+    public int IntValue => Type == TokenType.Int ? BinaryPrimitives.ReadInt32LittleEndian(Value) : 0;
+    public short ShortValue => Type == TokenType.Short ? BinaryPrimitives.ReadInt16LittleEndian(Value) : (short)0;
 }
 
 internal enum TokenType
