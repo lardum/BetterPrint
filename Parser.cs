@@ -19,6 +19,12 @@ public class Parser(string path)
         il.Add("pe_file_header", ParsePeFileHeader());
         il.Add("optional_header", ParseOptionalHeader());
         il.Add("sections", ParseSectionHeaders(il["pe_file_header"]["number_of_sections"]));
+
+        var cliHeader = il["optional_header"]["cli_header"];
+        var cliHeaderIndex = cliHeader.LongValue;
+        var value1 = BinaryPrimitives.ReadInt32LittleEndian(cliHeader.Value[4..].ToArray());
+        var value2 = BinaryPrimitives.ReadInt32LittleEndian(cliHeader.Value[..4].ToArray());
+
         il.Add("cli_header", ParseCliHeader());
 
         if (Debug)
@@ -94,7 +100,6 @@ public class Parser(string path)
             { "reserved", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
         };
 
-        var a = optionalHeader["cli_header"];
         return optionalHeader;
     }
 
