@@ -5,7 +5,7 @@ using System.Text.Json;
 namespace BetterPrint;
 
 // https://www.ecma-international.org/wp-content/uploads/ECMA-335_6th_edition_june_2012.pdf
-// https://www.cybb0rg.com/2024/07/20/pe-headers-and-sections-explained/
+// https://learn.microsoft.com/en-us/windows/win32/debug/pe-format
 public class Parser(string path)
 {
     public readonly byte[] FileBytes = File.ReadAllBytes(path);
@@ -20,10 +20,11 @@ public class Parser(string path)
         il.Add("optional_header", ParseOptionalHeader());
         il.Add("sections", ParseSectionHeaders(il["pe_file_header"]["number_of_sections"]));
 
-        var cliHeader = il["optional_header"]["cli_header"];
-        var cliHeaderIndex = cliHeader.LongValue;
-        var value1 = BinaryPrimitives.ReadInt32LittleEndian(cliHeader.Value[4..].ToArray());
-        var value2 = BinaryPrimitives.ReadInt32LittleEndian(cliHeader.Value[..4].ToArray());
+        var cliHeader = il["optional_header"]["clr_runtime_header"];
+        var clrHeaderRvaAddress = BinaryPrimitives.ReadInt32LittleEndian(cliHeader.Value[..4].ToArray());
+        var clrHeaderSize = BinaryPrimitives.ReadInt32LittleEndian(cliHeader.Value[4..].ToArray());
+
+        GetNext(clrHeaderSize); // skip the offset
 
         il.Add("cli_header", ParseCliHeader());
 
@@ -96,7 +97,7 @@ public class Parser(string path)
             { "bound_import", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
             { "iat", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
             { "delay_import_descriptor", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "cli_header", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "clr_runtime_header", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
             { "reserved", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
         };
 
@@ -157,6 +158,8 @@ public class Parser(string path)
         var cliHeader = new Dictionary<string, IlRecord>
         {
             { "size_of_header", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "major_runtime_version", new IlRecord(TokenType.Short, _cursor, GetNext(2)) },
+            { "minor_runtime_version", new IlRecord(TokenType.Short, _cursor, GetNext(2)) },
         };
 
         var a = cliHeader["size_of_header"];
