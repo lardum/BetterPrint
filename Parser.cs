@@ -8,11 +8,11 @@ namespace BetterPrint;
 // https://www.cybb0rg.com/2024/07/20/pe-headers-and-sections-explained/
 public class Parser(string path)
 {
-    private readonly byte[] _fileBytes = File.ReadAllBytes(path);
+    public readonly byte[] FileBytes = File.ReadAllBytes(path);
     private int _cursor;
     private const bool Debug = true;
 
-    public void Parse()
+    public Dictionary<string, Dictionary<string, IlRecord>> Parse()
     {
         var il = new Dictionary<string, Dictionary<string, IlRecord>>();
         il.Add(Consts.PeParts.DosHeader, ParseDosHeader());
@@ -20,10 +20,12 @@ public class Parser(string path)
         il.Add("optional_header", ParseOptionalHeader());
         il.Add("sections", ParseSectionHeaders(il["pe_file_header"]["number_of_sections"]));
 
-        var codeSection = il["sections"][".text"];
-        ExecuteCode(codeSection);
+        if (Debug)
+        {
+            PrintDebug(il);
+        }
 
-        PrintDebug(il);
+        return il;
     }
 
     private Dictionary<string, IlRecord> ParseDosHeader()
@@ -38,7 +40,7 @@ public class Parser(string path)
     {
         var peFileHeader = new Dictionary<string, IlRecord>();
 
-        var lfanewOffset = BinaryPrimitives.ReadUInt32LittleEndian(_fileBytes.Skip(60).Take(4).ToArray());
+        var lfanewOffset = BinaryPrimitives.ReadUInt32LittleEndian(FileBytes.Skip(60).Take(4).ToArray());
         if (lfanewOffset != 128) Console.WriteLine($"Wrong offset {lfanewOffset}");
 
         peFileHeader.Add("pe_signature", new IlRecord(TokenType.ByteText, _cursor, GetNext(4)));
@@ -122,14 +124,9 @@ public class Parser(string path)
         }
     }
 
-    private void ExecuteCode(IlRecord code)
-    {
-        var pointerToRawData = code.Children!["pointer_to_raw_data"].IntValue;
-    }
-
     private byte[] GetNext(int len = 1)
     {
-        var bts = _fileBytes.Skip(_cursor).Take(len).ToArray();
+        var bts = FileBytes.Skip(_cursor).Take(len).ToArray();
         _cursor += len;
         return bts;
     }
@@ -142,7 +139,7 @@ public class Parser(string path)
     }
 }
 
-internal record IlRecord(TokenType Type, int Index, byte[] Value, Dictionary<string, IlRecord>? Children = null)
+public record IlRecord(TokenType Type, int Index, byte[] Value, Dictionary<string, IlRecord>? Children = null)
 {
     private string ValueAsciiString() => Encoding.ASCII.GetString(Value);
     private string ValueBitString() => string.Join(" ", Value.Reverse().Select(x => x.ToString("B")));
@@ -165,7 +162,7 @@ internal record IlRecord(TokenType Type, int Index, byte[] Value, Dictionary<str
     public short ShortValue => Type == TokenType.Short ? BinaryPrimitives.ReadInt16LittleEndian(Value) : (short)0;
 }
 
-internal enum TokenType
+public enum TokenType
 {
     Binary,
     Byte,
