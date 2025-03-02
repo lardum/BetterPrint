@@ -19,11 +19,17 @@ public class Parser(string path)
         il.Add("pe_file_header", ParsePeFileHeader());
         il.Add("optional_header", ParseOptionalHeader());
         il.Add("sections", ParseSectionHeaders(il["pe_file_header"]["number_of_sections"]));
+        il.Add("cli_header", ParseCliHeader());
 
         if (Debug)
         {
             PrintDebug(il);
         }
+
+        var codeSection = il["sections"][".text"];
+        var rawDataPointer = codeSection.Children!["pointer_to_raw_data"].IntValue;
+        var rawDataSize = codeSection.Children!["size_of_raw_data"].IntValue;
+        var codeBytes = FileBytes.Skip(rawDataPointer).Take(rawDataSize).ToArray();
 
         return il;
     }
@@ -69,9 +75,26 @@ public class Parser(string path)
             { "base_of_code", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
             { "base_of_data", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
             { "nt_fields", new IlRecord(TokenType.Bytes, _cursor, GetNext(68)) },
-            { "data_directories", new IlRecord(TokenType.Bytes, _cursor, GetNext(128)) }
+            // II.25.2.3.3 Pe header data directories
+            { "export_table", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "import_table", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "resource_table", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "exception_table", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "certificate_table", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "base_relocation_table", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "debug", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "copyright", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "global_ptr", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "tls_table", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "load_config_table", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "bound_import", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "iat", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "delay_import_descriptor", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "cli_header", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "reserved", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
         };
 
+        var a = optionalHeader["cli_header"];
         return optionalHeader;
     }
 
@@ -124,6 +147,18 @@ public class Parser(string path)
         }
     }
 
+    private Dictionary<string, IlRecord> ParseCliHeader()
+    {
+        var cliHeader = new Dictionary<string, IlRecord>
+        {
+            { "size_of_header", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+        };
+
+        var a = cliHeader["size_of_header"];
+
+        return cliHeader;
+    }
+
     private byte[] GetNext(int len = 1)
     {
         var bts = FileBytes.Skip(_cursor).Take(len).ToArray();
@@ -152,14 +187,16 @@ public record IlRecord(TokenType Type, int Index, byte[] Value, Dictionary<strin
             TokenType.Byte => Value[0].ToString(),
             TokenType.Short => BinaryPrimitives.ReadInt16LittleEndian(Value).ToString(),
             TokenType.Int => BinaryPrimitives.ReadInt32LittleEndian(Value).ToString(),
+            TokenType.Long => BinaryPrimitives.ReadInt64LittleEndian(Value).ToString(),
             TokenType.DateTime => DateTimeOffset.FromUnixTimeSeconds(BinaryPrimitives.ReadUInt32LittleEndian(Value)).UtcDateTime.ToString("u"),
             TokenType.ByteText => ValueAsciiString(),
             TokenType.Bytes => ValueHexString(),
             _ => ValueHexString(),
         };
 
-    public int IntValue => Type == TokenType.Int ? BinaryPrimitives.ReadInt32LittleEndian(Value) : 0;
     public short ShortValue => Type == TokenType.Short ? BinaryPrimitives.ReadInt16LittleEndian(Value) : (short)0;
+    public int IntValue => Type == TokenType.Int ? BinaryPrimitives.ReadInt32LittleEndian(Value) : 0;
+    public long LongValue => Type == TokenType.Long ? BinaryPrimitives.ReadInt64LittleEndian(Value) : 0;
 }
 
 public enum TokenType
@@ -168,7 +205,8 @@ public enum TokenType
     Byte,
     Bytes,
     ByteText,
-    Int,
     Short,
+    Int,
+    Long,
     DateTime,
 }
