@@ -11,34 +11,47 @@ public class Parser(string path)
     public readonly byte[] FileBytes = File.ReadAllBytes(path);
     private int _cursor;
     private const bool Debug = true;
+    private readonly Dictionary<string, Dictionary<string, IlRecord>> _il = new();
 
     public Dictionary<string, Dictionary<string, IlRecord>> Parse()
     {
-        var il = new Dictionary<string, Dictionary<string, IlRecord>>();
-        il.Add(Consts.PeParts.DosHeader, ParseDosHeader());
-        il.Add("pe_file_header", ParsePeFileHeader());
-        il.Add("optional_header", ParseOptionalHeader());
-        il.Add("sections", ParseSectionHeaders(il["pe_file_header"]["number_of_sections"]));
-
-        var cliHeader = il["optional_header"]["clr_runtime_header"];
-        var clrHeaderRvaAddress = BinaryPrimitives.ReadInt32LittleEndian(cliHeader.Value[..4].ToArray());
-        var clrHeaderSize = BinaryPrimitives.ReadInt32LittleEndian(cliHeader.Value[4..].ToArray());
-
-        GetNext(clrHeaderSize); // skip the offset
-
-        il.Add("cli_header", ParseCliHeader());
+        _il.Add(Consts.PeParts.DosHeader, ParseDosHeader());
+        _il.Add("pe_file_header", ParsePeFileHeader());
+        _il.Add("optional_header", ParseOptionalHeader());
+        _il.Add("sections", ParseSectionHeaders(_il["pe_file_header"]["number_of_sections"]));
+        _il.Add("cli_header", ParseCliHeader());
 
         if (Debug)
         {
-            PrintDebug(il);
+            PrintDebug(_il);
         }
 
-        var codeSection = il["sections"][".text"];
+        var codeSection = _il["sections"][".text"];
         var rawDataPointer = codeSection.Children!["pointer_to_raw_data"].IntValue;
         var rawDataSize = codeSection.Children!["size_of_raw_data"].IntValue;
         var codeBytes = FileBytes.Skip(rawDataPointer).Take(rawDataSize).ToArray();
 
-        return il;
+        return _il;
+    }
+
+    /// <summary>
+    /// Where is this logic in the docks?
+    /// </summary>
+    /// <param name="rva"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    private int RvaToFileOffset(int rva)
+    {
+        foreach (var section in _il["sections"])
+        {
+            var virtualAddress = section.Value.Children!["virtual_address"].IntValue;
+            if (rva >= virtualAddress && rva < virtualAddress + virtualAddress)
+            {
+                return section.Value.Children["pointer_to_raw_data"].IntValue + (rva - virtualAddress);
+            }
+        }
+
+        throw new InvalidOperationException($"Could not convert RVA 0x{rva:X8} to file offset");
     }
 
     private Dictionary<string, IlRecord> ParseDosHeader()
@@ -155,14 +168,26 @@ public class Parser(string path)
 
     private Dictionary<string, IlRecord> ParseCliHeader()
     {
+        var clrHeader = _il["optional_header"]["clr_runtime_header"];
+        var clrHeaderRvaAddress = BinaryPrimitives.ReadInt32LittleEndian(clrHeader.Value[..4].ToArray());
+        var clrHeaderSize = BinaryPrimitives.ReadInt32LittleEndian(clrHeader.Value[4..].ToArray());
+        var clrHeaderOffset = RvaToFileOffset(clrHeaderRvaAddress);
+        _cursor = clrHeaderOffset;
+
         var cliHeader = new Dictionary<string, IlRecord>
         {
             { "size_of_header", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
             { "major_runtime_version", new IlRecord(TokenType.Short, _cursor, GetNext(2)) },
             { "minor_runtime_version", new IlRecord(TokenType.Short, _cursor, GetNext(2)) },
+            { "metadata", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "flags", new IlRecord(TokenType.Bytes, _cursor, GetNext(4)) },
+            { "entry_point_token", new IlRecord(TokenType.Bytes, _cursor, GetNext(4)) },
+            { "resources", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "strong_name_signature", new IlRecord(TokenType.Bytes, _cursor, GetNext(8)) },
+            { "code_manager_table", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "export_address_table_jumps", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "managed_native_header", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
         };
-
-        var a = cliHeader["size_of_header"];
 
         return cliHeader;
     }

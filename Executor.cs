@@ -2,7 +2,7 @@
 
 public class Executor
 {
-    private readonly byte[] _code;
+    private readonly byte[] _code = [];
 
     public Executor(Dictionary<string, Dictionary<string, IlRecord>> il)
     {
