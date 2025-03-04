@@ -20,6 +20,7 @@ public class Parser(string path)
         _il.Add("optional_header", ParseOptionalHeader());
         _il.Add("sections", ParseSectionHeaders(_il["pe_file_header"]["number_of_sections"]));
         _il.Add("cli_header", ParseCliHeader());
+        _il.Add("metadata_root", ParseMetadataRoot());
 
         if (Debug)
         {
@@ -201,6 +202,25 @@ public class Parser(string path)
         };
 
         return cliHeader;
+    }
+
+    private Dictionary<string, IlRecord> ParseMetadataRoot()
+    {
+        var metadataRootRva = _il["cli_header"]["metadata_rva"].IntValue;
+        var metadataOffset = RvaToFileOffset(metadataRootRva);
+
+        _cursor = metadataOffset;
+
+        var metadataRoot = new Dictionary<string, IlRecord>()
+        {
+            { "signature", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "major_version", new IlRecord(TokenType.Short, _cursor, GetNext(2)) },
+            { "minor_version", new IlRecord(TokenType.Short, _cursor, GetNext(2)) },
+            { "reserved", new IlRecord(TokenType.Bytes, _cursor, GetNext(4)) },
+            { "version_length", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+        };
+
+        return metadataRoot;
     }
 
     private byte[] GetNext(int len = 1)
