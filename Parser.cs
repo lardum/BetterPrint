@@ -64,19 +64,26 @@ public class Parser(string path)
 
     private Dictionary<string, IlRecord> ParsePeFileHeader()
     {
-        var peFileHeader = new Dictionary<string, IlRecord>();
+        var peHeaderOffset = BinaryPrimitives.ReadUInt32LittleEndian(FileBytes.Skip(60).Take(4).ToArray());
 
-        var lfanewOffset = BinaryPrimitives.ReadUInt32LittleEndian(FileBytes.Skip(60).Take(4).ToArray());
-        if (lfanewOffset != 128) Console.WriteLine($"Wrong offset {lfanewOffset}");
+        // Verify PE signature "PE\0\0"
+        if (FileBytes[peHeaderOffset] != 'P' || FileBytes[peHeaderOffset + 1] != 'E' ||
+            FileBytes[peHeaderOffset + 2] != 0 || FileBytes[peHeaderOffset + 3] != 0)
+        {
+            throw new InvalidOperationException("Invalid PE signature");
+        }
 
-        peFileHeader.Add("pe_signature", new IlRecord(TokenType.ByteText, _cursor, GetNext(4)));
-        peFileHeader.Add("machine", new IlRecord(TokenType.Bytes, _cursor, GetNext(2)));
-        peFileHeader.Add("number_of_sections", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
-        peFileHeader.Add("time_date_stamp", new IlRecord(TokenType.DateTime, _cursor, GetNext(4)));
-        peFileHeader.Add("pointer_to_symbol_table", new IlRecord(TokenType.Int, _cursor, GetNext(4)));
-        peFileHeader.Add("number_of_symbols", new IlRecord(TokenType.Int, _cursor, GetNext(4)));
-        peFileHeader.Add("optional_header_size", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
-        peFileHeader.Add("characteristics", new IlRecord(TokenType.Binary, _cursor, GetNext(2)));
+        var peFileHeader = new Dictionary<string, IlRecord>
+        {
+            { "pe_signature", new IlRecord(TokenType.ByteText, _cursor, GetNext(4)) },
+            { "machine", new IlRecord(TokenType.Bytes, _cursor, GetNext(2)) },
+            { "number_of_sections", new IlRecord(TokenType.Short, _cursor, GetNext(2)) },
+            { "time_date_stamp", new IlRecord(TokenType.DateTime, _cursor, GetNext(4)) },
+            { "pointer_to_symbol_table", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "number_of_symbols", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "optional_header_size", new IlRecord(TokenType.Short, _cursor, GetNext(2)) },
+            { "characteristics", new IlRecord(TokenType.Binary, _cursor, GetNext(2)) }
+        };
 
         return peFileHeader;
     }
@@ -94,8 +101,7 @@ public class Parser(string path)
             { "entry_point_rva", new IlRecord(TokenType.Bytes, _cursor, GetNext(4)) },
             { "base_of_code", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
             { "base_of_data", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "nt_fields", new IlRecord(TokenType.Bytes, _cursor, GetNext(68)) },
-            // II.25.2.3.3 Pe header data directories
+            { "nt_fields", new IlRecord(TokenType.Bytes, _cursor, GetNext(68)) }, // II.25.2.3.3 Pe header data directories
             { "export_table", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
             { "import_table", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
             { "resource_table", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
@@ -112,7 +118,7 @@ public class Parser(string path)
             { "delay_import_descriptor", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
             { "clr_runtime_header_rva", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
             { "clr_runtime_header_size", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "reserved", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "reserved", new IlRecord(TokenType.Long, _cursor, GetNext(8)) }
         };
 
         return optionalHeader;
