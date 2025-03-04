@@ -23,7 +23,7 @@ public class Executor
 
         return;
 
-        byte GetNextByteLocal()
+        byte GetNextByte()
         {
             var res = _code.Skip(cursor).Take(1).First();
             cursor++;

@@ -110,7 +110,8 @@ public class Parser(string path)
             { "bound_import", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
             { "iat", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
             { "delay_import_descriptor", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "clr_runtime_header", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "clr_runtime_header_rva", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "clr_runtime_header_size", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
             { "reserved", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
         };
 
@@ -168,10 +169,8 @@ public class Parser(string path)
 
     private Dictionary<string, IlRecord> ParseCliHeader()
     {
-        var clrHeader = _il["optional_header"]["clr_runtime_header"];
-        var clrHeaderRvaAddress = BinaryPrimitives.ReadInt32LittleEndian(clrHeader.Value[..4].ToArray());
-        var clrHeaderSize = BinaryPrimitives.ReadInt32LittleEndian(clrHeader.Value[4..].ToArray());
-        var clrHeaderOffset = RvaToFileOffset(clrHeaderRvaAddress);
+        var clrHeaderRva = _il["optional_header"]["clr_runtime_header_rva"].IntValue;
+        var clrHeaderOffset = RvaToFileOffset(clrHeaderRva);
         _cursor = clrHeaderOffset;
 
         var cliHeader = new Dictionary<string, IlRecord>
@@ -179,14 +178,20 @@ public class Parser(string path)
             { "size_of_header", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
             { "major_runtime_version", new IlRecord(TokenType.Short, _cursor, GetNext(2)) },
             { "minor_runtime_version", new IlRecord(TokenType.Short, _cursor, GetNext(2)) },
-            { "metadata", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "metadata_rva", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "metadata_size", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
             { "flags", new IlRecord(TokenType.Bytes, _cursor, GetNext(4)) },
             { "entry_point_token", new IlRecord(TokenType.Bytes, _cursor, GetNext(4)) },
-            { "resources", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "strong_name_signature", new IlRecord(TokenType.Bytes, _cursor, GetNext(8)) },
-            { "code_manager_table", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "export_address_table_jumps", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "managed_native_header", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "resources_rva", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "resources_size", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "strong_name_signature_rva", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "strong_name_signature_size", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "code_manager_table_rva", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "code_manager_table_size", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "export_address_table_jumps_rva", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "export_address_table_jumps_size", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "managed_native_header_rva", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "managed_native_header_size", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
         };
 
         return cliHeader;
