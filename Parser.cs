@@ -10,7 +10,7 @@ public class Parser(string path)
 {
     public readonly byte[] FileBytes = File.ReadAllBytes(path);
     private int _cursor;
-    private const bool Debug = true;
+    private const bool Debug = false;
     private readonly Dictionary<string, Dictionary<string, IlRecord>> _il = new();
 
     public Dictionary<string, Dictionary<string, IlRecord>> Parse()

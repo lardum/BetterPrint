@@ -2,7 +2,7 @@
 
 public class Executor
 {
-    private readonly byte[] _code = [];
+    private byte[] _code = [];
 
     public Executor(Dictionary<string, Dictionary<string, IlRecord>> il)
     {
@@ -12,18 +12,29 @@ public class Executor
         // var codeBytes = parser.FileBytes.Skip(rawDataPointer).Take(rawDataSize).ToArray();
     }
 
-    public void Execute()
+    public void Execute(byte[] code)
     {
+        _code = code;
         var cursor = 0;
 
         while (cursor < _code.Length)
         {
-        }
+            var opcode = GetNext();
+            Console.WriteLine(opcode.ToString("X"));
 
+            switch (opcode)
+            {
+                case 0xC8:
+                    Console.WriteLine("Bagno");
+                    break;
+            }
+
+            break;
+        }
 
         return;
 
-        byte GetNextByte()
+        byte GetNext()
         {
             var res = _code.Skip(cursor).Take(1).First();
             cursor++;
