@@ -230,15 +230,24 @@ public class Parser(string path)
 
         var version = Encoding.ASCII.GetString(FileBytes, versionOffset, versionEndOffset - versionOffset);
 
-        if (_debug)
-        {
-            Console.WriteLine($"CLR version {version}");
-        }
-
         var versionBytes = FileBytes.Skip(versionOffset).Take(versionEndOffset - versionOffset).ToArray();
 
         metadataRoot.Add("version_string", new IlRecord(TokenType.ByteText, versionOffset, versionBytes));
 
+        // Align to 4-byte boundary
+        var offset = versionOffset + versionBytes.Length;
+        offset = (offset + 3) & ~3;
+        _cursor = offset;
+
+        metadataRoot.Add("flags", new IlRecord(TokenType.Bytes, _cursor, GetNext(2)));
+        metadataRoot.Add("number_of_streams", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
+        metadataRoot.Add("stream_header_offset", new IlRecord(TokenType.Short, _cursor, BitConverter.GetBytes(offset)));
+
+        if (_debug)
+        {
+            Console.WriteLine($"CLR version {version}, Metadata streams: {metadataRoot["number_of_streams"].IntValue}");
+        }
+        
         return metadataRoot;
     }
 
