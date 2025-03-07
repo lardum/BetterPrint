@@ -10,7 +10,7 @@ public class Parser(string path)
 {
     public readonly byte[] FileBytes = File.ReadAllBytes(path);
     private int _cursor;
-    private const bool Debug = false;
+    private readonly bool _debug = false;
     private readonly Dictionary<string, Dictionary<string, IlRecord>> _il = new();
 
     public Dictionary<string, Dictionary<string, IlRecord>> Parse()
@@ -22,7 +22,7 @@ public class Parser(string path)
         _il.Add("cli_header", ParseCliHeader());
         _il.Add("metadata_root", ParseMetadataRoot());
 
-        if (Debug)
+        if (_debug)
         {
             PrintDebug(_il);
         }
@@ -154,7 +154,7 @@ public class Parser(string path)
                 { "characteristics", new IlRecord(TokenType.Binary, index + localCursor, GetNextLocal(4)) }
             };
 
-            if (Debug)
+            if (_debug)
             {
                 var characteristics = sectionDetails["characteristics"];
                 var flags = Consts.ParseFlags(characteristics.Value, Consts.SectionHeaderCharacteristics);
@@ -219,6 +219,25 @@ public class Parser(string path)
             { "reserved", new IlRecord(TokenType.Bytes, _cursor, GetNext(4)) },
             { "version_length", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
         };
+
+        // Read version string (null-terminated)
+        var versionOffset = metadataOffset + 16;
+        var versionEndOffset = versionOffset;
+        while (FileBytes[versionEndOffset] != 0 && versionEndOffset < FileBytes.Length)
+        {
+            versionEndOffset++;
+        }
+
+        var version = Encoding.ASCII.GetString(FileBytes, versionOffset, versionEndOffset - versionOffset);
+
+        if (_debug)
+        {
+            Console.WriteLine($"CLR version {version}");
+        }
+
+        var versionBytes = FileBytes.Skip(versionOffset).Take(versionEndOffset - versionOffset).ToArray();
+
+        metadataRoot.Add("version_string", new IlRecord(TokenType.ByteText, versionOffset, versionBytes));
 
         return metadataRoot;
     }
