@@ -204,6 +204,7 @@ public class Parser(string path)
         return cliHeader;
     }
 
+    // I.24.2.1 Metadata root 
     private Dictionary<string, IlRecord> ParseMetadataRoot()
     {
         var metadataRootRva = _il["cli_header"]["metadata_rva"].IntValue;
@@ -241,14 +242,49 @@ public class Parser(string path)
 
         metadataRoot.Add("flags", new IlRecord(TokenType.Bytes, _cursor, GetNext(2)));
         metadataRoot.Add("number_of_streams", new IlRecord(TokenType.Short, _cursor, GetNext(2)));
-        metadataRoot.Add("stream_header_offset", new IlRecord(TokenType.Short, _cursor, BitConverter.GetBytes(offset)));
 
         if (_debug)
         {
             Console.WriteLine($"CLR version {version}, Metadata streams: {metadataRoot["number_of_streams"].IntValue}");
         }
-        
+
+        ParseMetadataStreams(metadataRoot, metadataRoot["number_of_streams"].ShortValue);
+
         return metadataRoot;
+    }
+
+    private void ParseMetadataStreams(Dictionary<string, IlRecord> metadataRoot, int numberOfStreams)
+    {
+        for (var i = 0; i < numberOfStreams; i++)
+        {
+            var streamOffsetBytes = GetNext(4);
+            var streamSizeBytes = GetNext(4);
+
+            // Read stream name (null-terminated)
+            var nameOffset = _cursor;
+            var nameEndOffset = nameOffset;
+            while (FileBytes[nameEndOffset] != 0 && nameEndOffset < FileBytes.Length)
+            {
+                nameEndOffset++;
+            }
+
+
+            var nameBytes = GetNext(nameEndOffset - nameOffset);
+            var streamName = Encoding.ASCII.GetString(nameBytes);
+            var index = _cursor - nameBytes.Length - 8;
+            metadataRoot
+                .Add($"{streamName}_header", new IlRecord(TokenType.Bytes, index, FileBytes.Skip(index).Take(8 + nameBytes.Length).ToArray(),
+                    new Dictionary<string, IlRecord>
+                    {
+                        { "offset", new IlRecord(TokenType.Int, index, streamOffsetBytes) },
+                        { "size", new IlRecord(TokenType.Int, index + 4, streamSizeBytes) },
+                        { "name", new IlRecord(TokenType.ByteText, index + 4, nameBytes) }
+                    }));
+
+            // Move to next stream header (align to 4-byte boundary)
+            var offset = nameEndOffset + 1;
+            _cursor = (offset + 3) & ~3;
+        }
     }
 
     private byte[] GetNext(int len = 1)
