@@ -268,23 +268,85 @@ public class Parser(string path)
                 nameEndOffset++;
             }
 
-
             var nameBytes = GetNext(nameEndOffset - nameOffset);
             var streamName = Encoding.ASCII.GetString(nameBytes);
             var index = _cursor - nameBytes.Length - 8;
             metadataRoot
-                .Add($"{streamName}_header", new IlRecord(TokenType.Bytes, index, FileBytes.Skip(index).Take(8 + nameBytes.Length).ToArray(),
+                .Add($"{streamName}", new IlRecord(TokenType.Bytes, index, FileBytes.Skip(index).Take(8 + nameBytes.Length).ToArray(),
                     new Dictionary<string, IlRecord>
                     {
                         { "offset", new IlRecord(TokenType.Int, index, streamOffsetBytes) },
                         { "size", new IlRecord(TokenType.Int, index + 4, streamSizeBytes) },
-                        { "name", new IlRecord(TokenType.ByteText, index + 4, nameBytes) }
+                        { "name", new IlRecord(TokenType.ByteText, index + 4, nameBytes) },
                     }));
 
             // Move to next stream header (align to 4-byte boundary)
             var offset = nameEndOffset + 1;
             _cursor = (offset + 3) & ~3;
         }
+
+        var tableStream = metadataRoot.FirstOrDefault(x => x.Key is "#~" or "#-").Value;
+
+        if (tableStream is not null)
+        {
+            ParseTypeDefs(metadataRoot, tableStream);
+        }
+    }
+
+    private void ParseTypeDefs(Dictionary<string, IlRecord> metadataRoot, IlRecord tableStream)
+    {
+        var fileOffset = RvaToFileOffset(_il["cli_header"]["metadata_rva"].IntValue + tableStream.Children["offset"].IntValue);
+        _cursor = fileOffset;
+
+        var children = new Dictionary<string, IlRecord>
+        {
+            { "reserved", new IlRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "major_version", new IlRecord(TokenType.Byte, _cursor, GetNext()) },
+            { "minor_version", new IlRecord(TokenType.Byte, _cursor, GetNext()) },
+            { "heap_of_set_sizes", new IlRecord(TokenType.Byte, _cursor, GetNext()) },
+            { "reserved_2", new IlRecord(TokenType.Byte, _cursor, GetNext()) },
+            { "mask_valid", new IlRecord(TokenType.Long, _cursor, GetNext(8)) },
+            { "mask_sorted", new IlRecord(TokenType.Long, _cursor, GetNext(8)) }
+        };
+
+        // Parse table row counts (for each bit set in validTables)
+        ulong validTables = (ulong)children["mask_valid"].LongValue;
+        uint[] rowCounts = new uint[64];
+        for (var i = 0; i < 64; i++)
+        {
+            if ((validTables & (1UL << i)) != 0)
+            {
+                rowCounts[i] = BitConverter.ToUInt32(GetNext(4));
+            }
+        }
+
+        // Calculate string index size (if strings heap is large)
+        int heapSizes = children["heap_of_set_sizes"].Value.First();
+        var largeStrings = (heapSizes & 0x01) != 0;
+        var largeGUID = (heapSizes & 0x02) != 0;
+        var largeBlob = (heapSizes & 0x04) != 0;
+
+        // For TypeDef table (0x02), we need the row count
+        if ((validTables & (1UL << 0x02)) != 0 && rowCounts[0x02] > 0)
+        {
+            // Find the relevant heap streams
+            var stringsStream = metadataRoot.First(x => x.Key == "#Strings").Value;
+            var blobStream = metadataRoot.First(x => x.Key == "#Blob").Value;
+
+            // Parse TypeDef table
+            ParseTypeDefTable(_cursor, rowCounts, largeStrings, largeGUID, largeBlob, stringsStream, blobStream);
+        }
+        else
+        {
+            Console.WriteLine("No TypeDef entries in the metadata");
+        }
+
+        metadataRoot.Add("tables_header", new IlRecord(TokenType.Bytes, 0, [], children));
+    }
+
+    private void ParseTypeDefTable(int tablesOffset, uint[] rowCounts, bool largeStrings, bool largeGUID, bool largeBlob,
+        IlRecord stringsStream, IlRecord blobStream)
+    {
     }
 
     private byte[] GetNext(int len = 1)
@@ -334,7 +396,7 @@ public enum TokenType
     Bytes,
     ByteText,
     Short,
-    Int,
-    Long,
+    Int, // DWord
+    Long, // QWord
     DateTime,
 }
