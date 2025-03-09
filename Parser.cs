@@ -271,6 +271,8 @@ public class Parser(string path)
             var nameBytes = GetNext(nameEndOffset - nameOffset);
             var streamName = Encoding.ASCII.GetString(nameBytes);
             var index = _cursor - nameBytes.Length - 8;
+
+            var fileOffset = RvaToFileOffset(_il["cli_header"]["metadata_rva"].IntValue + BinaryPrimitives.ReadInt32LittleEndian(streamOffsetBytes));
             metadataRoot
                 .Add($"{streamName}", new IlRecord(TokenType.Bytes, index, FileBytes.Skip(index).Take(8 + nameBytes.Length).ToArray(),
                     new Dictionary<string, IlRecord>
@@ -278,6 +280,7 @@ public class Parser(string path)
                         { "offset", new IlRecord(TokenType.Int, index, streamOffsetBytes) },
                         { "size", new IlRecord(TokenType.Int, index + 4, streamSizeBytes) },
                         { "name", new IlRecord(TokenType.ByteText, index + 4, nameBytes) },
+                        { "file_offset", new IlRecord(TokenType.Int, index + 4, BitConverter.GetBytes(fileOffset)) }
                     }));
 
             // Move to next stream header (align to 4-byte boundary)
@@ -295,7 +298,7 @@ public class Parser(string path)
 
     private void ParseTypeDefs(Dictionary<string, IlRecord> metadataRoot, IlRecord tableStream)
     {
-        var fileOffset = RvaToFileOffset(_il["cli_header"]["metadata_rva"].IntValue + tableStream.Children["offset"].IntValue);
+        var fileOffset = tableStream.Children["file_offset"].IntValue;
         _cursor = fileOffset;
 
         var children = new Dictionary<string, IlRecord>
@@ -310,8 +313,8 @@ public class Parser(string path)
         };
 
         // Parse table row counts (for each bit set in validTables)
-        ulong validTables = (ulong)children["mask_valid"].LongValue;
-        uint[] rowCounts = new uint[64];
+        var validTables = (ulong)children["mask_valid"].LongValue;
+        var rowCounts = new uint[64];
         for (var i = 0; i < 64; i++)
         {
             if ((validTables & (1UL << i)) != 0)
@@ -347,6 +350,81 @@ public class Parser(string path)
     private void ParseTypeDefTable(int tablesOffset, uint[] rowCounts, bool largeStrings, bool largeGUID, bool largeBlob,
         IlRecord stringsStream, IlRecord blobStream)
     {
+        // Calculate offsets of different tables
+        var typeDefOffset = tablesOffset;
+
+        // Need to account for rows in tables that come before TypeDef
+        for (var i = 0; i < 0x02; i++)
+        {
+            if ((rowCounts[i] > 0))
+            {
+                // Need to calculate table size and add it
+                // This is complex and depends on the specific table
+                // For simplicity, just adding placeholder
+                typeDefOffset += (int)(rowCounts[i] * 16); // Approximate
+            }
+        }
+
+        if (_debug)
+        {
+            Console.WriteLine($"TypeDef Table Offset: 0x{typeDefOffset:X8}, Rows: {rowCounts[0x02]}");
+        }
+
+        // TypeDef table column sizes depend on various factors
+        int stringsIndexSize = largeStrings ? 4 : 2;
+        int blobIndexSize = largeBlob ? 4 : 2;
+        int tableIndexSize = 2; // Depends on max rows, simplified here
+
+        int typeDefRowSize = 4 + stringsIndexSize + stringsIndexSize + tableIndexSize + tableIndexSize + tableIndexSize;
+
+        for (int i = 0; i < rowCounts[0x02]; i++)
+        {
+            int rowOffset = typeDefOffset + (i * typeDefRowSize);
+
+            uint flags = BitConverter.ToUInt32(FileBytes, rowOffset);
+
+            // Read name from strings heap
+            int nameIndex = largeStrings
+                ? BitConverter.ToInt32(FileBytes, rowOffset + 4)
+                : BitConverter.ToUInt16(FileBytes, rowOffset + 4);
+
+            // Read namespace from strings heap
+            int namespaceIndex = largeStrings
+                ? BitConverter.ToInt32(FileBytes, rowOffset + 4 + stringsIndexSize)
+                : BitConverter.ToUInt16(FileBytes, rowOffset + 4 + stringsIndexSize);
+
+            string name = ReadStringFromHeap(stringsStream, nameIndex);
+            string namespaceName = ReadStringFromHeap(stringsStream, namespaceIndex);
+
+            // var typeDef = new TypeDefinition
+            // {
+            //     Flags = flags,
+            //     Name = name,
+            //     Namespace = namespaceName,
+            //     FullName = string.IsNullOrEmpty(namespaceName) ? name : $"{namespaceName}.{name}"
+            // };
+
+            // TypeDefinitions.Add(typeDef);
+        }
+    }
+
+    private string ReadStringFromHeap(IlRecord stringsStream, int index)
+    {
+        if (stringsStream == null || index <= 0)
+        {
+            return string.Empty;
+        }
+
+        var stringOffset = stringsStream.Children["file_offset"].IntValue + index;
+
+        // Find end of string (null-terminated)
+        int endOffset = stringOffset;
+        while (endOffset < FileBytes.Length && FileBytes[endOffset] != 0)
+        {
+            endOffset++;
+        }
+
+        return Encoding.UTF8.GetString(FileBytes, stringOffset, endOffset - stringOffset);
     }
 
     private byte[] GetNext(int len = 1)
