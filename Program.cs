@@ -10,4 +10,4 @@ var rawDataSize = codeSection.Children!["size_of_raw_data"].IntValue;
 var codeBytes = parser.FileBytes.Skip(rawDataPointer).Take(rawDataSize).ToArray();
 
 var executor = new VirtualMachine(il);
-executor.Execute(codeBytes);
+// executor.Execute(codeBytes);

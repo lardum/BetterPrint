@@ -248,12 +248,12 @@ public class Parser(string path)
             Console.WriteLine($"CLR version {version}, Metadata streams: {metadataRoot["number_of_streams"].IntValue}");
         }
 
-        ParseMetadataStreams(metadataRoot, metadataRoot["number_of_streams"].ShortValue);
+        ParseMetadataStreamHeaders(metadataRoot, metadataRoot["number_of_streams"].ShortValue);
 
         return metadataRoot;
     }
 
-    private void ParseMetadataStreams(Dictionary<string, IlRecord> metadataRoot, int numberOfStreams)
+    private void ParseMetadataStreamHeaders(Dictionary<string, IlRecord> metadataRoot, int numberOfStreams)
     {
         for (var i = 0; i < numberOfStreams; i++)
         {
@@ -292,11 +292,11 @@ public class Parser(string path)
 
         if (tableStream is not null)
         {
-            ParseTypeDefs(metadataRoot, tableStream);
+            ParseTablesHeader(metadataRoot, tableStream);
         }
     }
 
-    private void ParseTypeDefs(Dictionary<string, IlRecord> metadataRoot, IlRecord tableStream)
+    private void ParseTablesHeader(Dictionary<string, IlRecord> metadataRoot, IlRecord tableStream)
     {
         var fileOffset = tableStream.Children["file_offset"].IntValue;
         _cursor = fileOffset;
@@ -337,7 +337,8 @@ public class Parser(string path)
             var blobStream = metadataRoot.First(x => x.Key == "#Blob").Value;
 
             // Parse TypeDef table
-            ParseTypeDefTable(_cursor, rowCounts, largeStrings, largeGUID, largeBlob, stringsStream, blobStream);
+            // its parsing streams, we dont want to do it yet
+            // ParseTypeDefTable(_cursor, rowCounts, largeStrings, largeGUID, largeBlob, stringsStream, blobStream, metadataRoot);
         }
         else
         {
@@ -348,8 +349,12 @@ public class Parser(string path)
     }
 
     private void ParseTypeDefTable(int tablesOffset, uint[] rowCounts, bool largeStrings, bool largeGUID, bool largeBlob,
-        IlRecord stringsStream, IlRecord blobStream)
+        IlRecord stringsStream, IlRecord blobStream, Dictionary<string, IlRecord> metadataRoot)
     {
+        // Console.WriteLine("------------------");
+        // Console.WriteLine(JsonSerializer.Serialize(metadataRoot, new JsonSerializerOptions { WriteIndented = true }));
+        // Console.WriteLine("------------------");
+
         // Calculate offsets of different tables
         var typeDefOffset = tablesOffset;
 
@@ -465,6 +470,7 @@ public record IlRecord(TokenType Type, int Index, byte[] Value, Dictionary<strin
     public short ShortValue => Type == TokenType.Short ? BinaryPrimitives.ReadInt16LittleEndian(Value) : (short)0;
     public int IntValue => Type == TokenType.Int ? BinaryPrimitives.ReadInt32LittleEndian(Value) : 0;
     public long LongValue => Type == TokenType.Long ? BinaryPrimitives.ReadInt64LittleEndian(Value) : 0;
+    public string HexValue => BitConverter.ToString(Value.Reverse().ToArray());
 }
 
 public enum TokenType
