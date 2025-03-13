@@ -272,7 +272,8 @@ public class Parser(string path)
             var streamName = Encoding.ASCII.GetString(nameBytes);
             var index = _cursor - nameBytes.Length - 8;
 
-            var fileOffset = RvaToFileOffset(_metadata["cli_header"]["metadata_rva"].IntValue + BinaryPrimitives.ReadInt32LittleEndian(streamOffsetBytes));
+            var fileOffset =
+                RvaToFileOffset(_metadata["cli_header"]["metadata_rva"].IntValue + BinaryPrimitives.ReadInt32LittleEndian(streamOffsetBytes));
             metadataRoot
                 .Add($"{streamName}", new IlRecord(TokenType.Bytes, index, FileBytes.Skip(index).Take(8 + nameBytes.Length).ToArray(),
                     new Dictionary<string, IlRecord>
@@ -312,16 +313,54 @@ public class Parser(string path)
             { "mask_sorted", new IlRecord(TokenType.Long, _cursor, GetNext(8)) }
         };
 
+        // mask_sorted index => 2E4 (740)
         // Parse table row counts (for each bit set in validTables)
+
+        // The Valid field is a 64-bit bitvector that has a specific bit set for each table that is stored in the stream;
+        // the mapping of tables to indexes is given at the start of §II.22. For example when the DeclSecurity
+        // table is present in the logical metadata, bit 0x0e should be set in the Valid vector. It is invalid to
+        // include non-existent tables in Valid, so all bits above 0x2c shall be zero.
+        // The Rows array contains the number of rows for each of the tables that are present. When decoding
+        // physical metadata to logical metadata, the number of 1’s in Valid indicates the number of elements in
+        // the Rows array.
+        // A crucial aspect in the encoding of a logical table is its schema. The schema for each table is given
+        // in §II.22. For example, the table with assigned index 0x02 is a TypeDef table, which, according to its
+        // specification in §II.22.37, has the following columns: a 4-byte-wide flags, an index into the String
+        // heap, another index into the String heap, an index into TypeDef , TypeRef , or TypeSpec table, an index
+        // into Field table, and an index into MethodDef table
+        // The physical representation of a table with n columns and m rows with schema (C0,…,Cn-1) consists of
+        // the concatenation of the physical representation of each of its rows. The physical representation of a
+        // row with schema (C0,…, n-1) is the concatenation of the physical representation of each of its elements.
+        // The physical representation of a row cell e at a column with type C is defined as follows:
+        // - If e is a constant, it is stored using the number of bytes as specified for its column
+        // type C (i.e., a 2-bit mask of type PropertyAttributes)
+        // - If e is an index into the GUID heap, 'blob', or String heap, it is stored using the
+        // number of bytes as defined in the HeapSizes field.
+        // - If e is a simple index into a table with index i, it is stored using 2 bytes if table i has
+        // less than 216 rows, otherwise it is stored using 4 bytes.
+        // 274 © Ecma International 2012
+        // - If e is a coded index that points into table ti out of n possible tables t0, …tn-1, then it
+        // is stored as e << (log n) | tag{ t0, …tn-1}[ ti] using 2 bytes if the maximum number
+        // of rows of tables t0, …tn-1, is less than 2(16 – (log n)), and using 4 bytes otherwise. The
+        // family of finite maps tag{ t0, …tn-1} is defined below. Note that decoding a physical
+        // row requires the inverse of this mapping. [For example, the Parent column of the
+        // Constant table indexes a row in the Field, Param, or Property tables. The actual
+        // table is encoded into the low 2 bits of the number, using the values: 0 => Field, 1 =>
+        // Param, 2 => Property.The remaining bits hold the actual row number being
+        // indexed. For example, a value of 0x321, indexes row number 0xC8 in the Param
         var validTables = (ulong)children["mask_valid"].LongValue;
         var rowCounts = new uint[64];
+        var numberOfRows = 0;
         for (var i = 0; i < 64; i++)
         {
             if ((validTables & (1UL << i)) != 0)
             {
+                numberOfRows++;
                 rowCounts[i] = BitConverter.ToUInt32(GetNext(4));
             }
         }
+
+        var typeDef = rowCounts[2];
 
         // Calculate string index size (if strings heap is large)
         int heapSizes = children["heap_of_set_sizes"].Value.First();
@@ -346,12 +385,18 @@ public class Parser(string path)
         }
 
         metadataRoot.Add("tables_header", new IlRecord(TokenType.Bytes, 0, [], children));
-        
-        Console.WriteLine("------------------");
-        Console.WriteLine(JsonSerializer.Serialize(metadataRoot, new JsonSerializerOptions { WriteIndented = true }));
-        Console.WriteLine("------------------");
+
+        if (_debug)
+        {
+            Console.WriteLine("------------------");
+            Console.WriteLine(JsonSerializer.Serialize(metadataRoot, new JsonSerializerOptions { WriteIndented = true }));
+            Console.WriteLine("------------------");
+        }
     }
 
+    /// <summary>
+    /// to delete?
+    /// </summary>
     private void ParseTypeDefTable(int tablesOffset, uint[] rowCounts, bool largeStrings, bool largeGUID, bool largeBlob,
         IlRecord stringsStream, IlRecord blobStream, Dictionary<string, IlRecord> metadataRoot)
     {
