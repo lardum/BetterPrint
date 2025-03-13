@@ -11,28 +11,28 @@ public class Parser(string path)
     public readonly byte[] FileBytes = File.ReadAllBytes(path);
     private int _cursor;
     private readonly bool _debug = false;
-    private readonly Dictionary<string, Dictionary<string, IlRecord>> _il = new();
+    private readonly Dictionary<string, Dictionary<string, IlRecord>> _metadata = new();
 
     public Dictionary<string, Dictionary<string, IlRecord>> Parse()
     {
-        _il.Add(Consts.PeParts.DosHeader, ParseDosHeader());
-        _il.Add("pe_file_header", ParsePeFileHeader());
-        _il.Add("optional_header", ParseOptionalHeader());
-        _il.Add("sections", ParseSectionHeaders(_il["pe_file_header"]["number_of_sections"]));
-        _il.Add("cli_header", ParseCliHeader());
-        _il.Add("metadata_root", ParseMetadataRoot());
+        _metadata.Add(Consts.PeParts.DosHeader, ParseDosHeader());
+        _metadata.Add("pe_file_header", ParsePeFileHeader());
+        _metadata.Add("optional_header", ParseOptionalHeader());
+        _metadata.Add("sections", ParseSectionHeaders(_metadata["pe_file_header"]["number_of_sections"]));
+        _metadata.Add("cli_header", ParseCliHeader());
+        _metadata.Add("metadata_root", ParseMetadataRoot());
 
         if (_debug)
         {
-            PrintDebug(_il);
+            PrintDebug(_metadata);
         }
 
-        var codeSection = _il["sections"][".text"];
+        var codeSection = _metadata["sections"][".text"];
         var rawDataPointer = codeSection.Children!["pointer_to_raw_data"].IntValue;
         var rawDataSize = codeSection.Children!["size_of_raw_data"].IntValue;
         var codeBytes = FileBytes.Skip(rawDataPointer).Take(rawDataSize).ToArray();
 
-        return _il;
+        return _metadata;
     }
 
     /// <summary>
@@ -43,7 +43,7 @@ public class Parser(string path)
     /// <exception cref="InvalidOperationException"></exception>
     private int RvaToFileOffset(int rva)
     {
-        foreach (var section in _il["sections"])
+        foreach (var section in _metadata["sections"])
         {
             var virtualAddress = section.Value.Children!["virtual_address"].IntValue;
             if (rva >= virtualAddress && rva < virtualAddress + virtualAddress)
@@ -176,7 +176,7 @@ public class Parser(string path)
 
     private Dictionary<string, IlRecord> ParseCliHeader()
     {
-        var clrHeaderRva = _il["optional_header"]["clr_runtime_header_rva"].IntValue;
+        var clrHeaderRva = _metadata["optional_header"]["clr_runtime_header_rva"].IntValue;
         var clrHeaderOffset = RvaToFileOffset(clrHeaderRva);
         _cursor = clrHeaderOffset;
 
@@ -207,7 +207,7 @@ public class Parser(string path)
     // I.24.2.1 Metadata root 
     private Dictionary<string, IlRecord> ParseMetadataRoot()
     {
-        var metadataRootRva = _il["cli_header"]["metadata_rva"].IntValue;
+        var metadataRootRva = _metadata["cli_header"]["metadata_rva"].IntValue;
         var metadataOffset = RvaToFileOffset(metadataRootRva);
 
         _cursor = metadataOffset;
@@ -272,7 +272,7 @@ public class Parser(string path)
             var streamName = Encoding.ASCII.GetString(nameBytes);
             var index = _cursor - nameBytes.Length - 8;
 
-            var fileOffset = RvaToFileOffset(_il["cli_header"]["metadata_rva"].IntValue + BinaryPrimitives.ReadInt32LittleEndian(streamOffsetBytes));
+            var fileOffset = RvaToFileOffset(_metadata["cli_header"]["metadata_rva"].IntValue + BinaryPrimitives.ReadInt32LittleEndian(streamOffsetBytes));
             metadataRoot
                 .Add($"{streamName}", new IlRecord(TokenType.Bytes, index, FileBytes.Skip(index).Take(8 + nameBytes.Length).ToArray(),
                     new Dictionary<string, IlRecord>
@@ -298,7 +298,7 @@ public class Parser(string path)
 
     private void ParseTablesHeader(Dictionary<string, IlRecord> metadataRoot, IlRecord tableStream)
     {
-        var fileOffset = tableStream.Children["file_offset"].IntValue;
+        var fileOffset = tableStream.Children!["file_offset"].IntValue;
         _cursor = fileOffset;
 
         var children = new Dictionary<string, IlRecord>
@@ -346,6 +346,10 @@ public class Parser(string path)
         }
 
         metadataRoot.Add("tables_header", new IlRecord(TokenType.Bytes, 0, [], children));
+        
+        Console.WriteLine("------------------");
+        Console.WriteLine(JsonSerializer.Serialize(metadataRoot, new JsonSerializerOptions { WriteIndented = true }));
+        Console.WriteLine("------------------");
     }
 
     private void ParseTypeDefTable(int tablesOffset, uint[] rowCounts, bool largeStrings, bool largeGUID, bool largeBlob,
