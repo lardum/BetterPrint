@@ -348,14 +348,21 @@ public class Parser(string path)
         // table is encoded into the low 2 bits of the number, using the values: 0 => Field, 1 =>
         // Param, 2 => Property.The remaining bits hold the actual row number being
         // indexed. For example, a value of 0x321, indexes row number 0xC8 in the Param
+
+        // The number of 1s in the Valid bitvector determines how many values exist in Rows.
+        // For hello word Valid value is: 0 0 0 1001 0 0 10101 1000111 as ValueBitString
+        // Read the Valid field (64-bit number).
+        // Check which bits are set (1) to know which tables exist.
+        // Read the Rows array to get the row count for each existing table.
+
+        // Store this information in a dictionary {table_name: row_count}.
         var validTables = (ulong)children["mask_valid"].LongValue;
+        Console.WriteLine(children["mask_valid"].ValueBitString());
         var rowCounts = new uint[64];
-        var numberOfRows = 0;
         for (var i = 0; i < 64; i++)
         {
             if ((validTables & (1UL << i)) != 0)
             {
-                numberOfRows++;
                 rowCounts[i] = BitConverter.ToUInt32(GetNext(4));
             }
         }
@@ -498,8 +505,8 @@ public class Parser(string path)
 
 public record IlRecord(TokenType Type, int Index, byte[] Value, Dictionary<string, IlRecord>? Children = null)
 {
-    private string ValueAsciiString() => Encoding.ASCII.GetString(Value);
-    private string ValueBitString() => string.Join(" ", Value.Reverse().Select(x => x.ToString("B")));
+    public string ValueAsciiString() => Encoding.ASCII.GetString(Value);
+    public string ValueBitString() => string.Join(" ", Value.Reverse().Select(x => x.ToString("B")));
     public string ValueHexString() => BitConverter.ToString(Value.Reverse().ToArray());
 
     public string StringValue
