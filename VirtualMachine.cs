@@ -7,12 +7,12 @@ public class VirtualMachine
 {
     private byte[] _code = [];
 
-    public VirtualMachine(Dictionary<string, Dictionary<string, IlRecord>> il)
+    public VirtualMachine(Dictionary<string, Dictionary<string, MetadataRecord>> il)
     {
         var codeSection = il["sections"][".text"];
         var rawDataPointer = codeSection.Children!["pointer_to_raw_data"].IntValue;
         var rawDataSize = codeSection.Children!["size_of_raw_data"].IntValue;
-        Console.WriteLine($"Raw data pointer: {rawDataPointer}, and its size {rawDataSize}");
+        // Console.WriteLine($"Raw data pointer: {rawDataPointer}, and its size {rawDataSize}");
         // var codeBytes = parser.FileBytes.Skip(rawDataPointer).Take(rawDataSize).ToArray();
     }
 
