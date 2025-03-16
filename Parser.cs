@@ -14,6 +14,8 @@ public class Parser(string path)
     private readonly bool _debug = false;
     private readonly Dictionary<string, Dictionary<string, MetadataRecord>> _metadata = new();
 
+    public MetadataModule Module = null!;
+
     public Dictionary<string, Dictionary<string, MetadataRecord>> Parse()
     {
         _metadata.Add(Consts.PeParts.DosHeader, ParseDosHeader());
@@ -334,11 +336,24 @@ public class Parser(string path)
             }
         }
 
-        var methodDefIndex = 0x06; // MethodDef table index
-        var methodDefRowCount = rowCounts[methodDefIndex]; // Number of methods
+        var stringHeapSize = GetHeapIndexSize("String");
+        var guidHeapSize = GetHeapIndexSize("GUID");
+        Module = new MetadataModule
+        {
+            Generation = new MetadataRecord(TokenType.Short, _cursor, GetNext(2)),
+            Name = new MetadataRecord(stringHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(stringHeapSize)),
+            Mvid = new MetadataRecord(guidHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(guidHeapSize)),
+            EncId = new MetadataRecord(guidHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(guidHeapSize)),
+            EncBaseId = new MetadataRecord(guidHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(guidHeapSize))
+        };
 
+        const int methodDefIndex = 0x06; // MethodDef table index
+        var methodDefRowCount = rowCounts[methodDefIndex]; // Number of methods
         var methodDefRowSize = CalculateMethodDefRowSize();
-        Console.WriteLine($"MethodDef Row Size: {methodDefRowSize}");
+
+        for (var i = 0; i < methodDefRowCount; i++)
+        {
+        }
 
         return;
 
