@@ -42,3 +42,46 @@ public class MetadataModule(MetadataRecord generation, MetadataRecord name, Meta
     //     return true;
     // }
 }
+
+/// <summary>
+/// II.22.38 TypeRef : 0x01
+/// </summary>
+public class TypeRef(MetadataRecord resolutionScope, MetadataRecord typeName, MetadataRecord typeNamespace)
+{
+    public MetadataRecord ResolutionScope { get; } = resolutionScope;
+    public MetadataRecord TypeName { get; } = typeName;
+    public MetadataRecord TypeNamespace { get; } = typeNamespace;
+}
+
+/// <summary>
+/// II.22.26 MethodDef : 0x06
+/// </summary>
+public class MethodDef(MetadataRecord rva, MetadataRecord implFlags, MetadataRecord flags, MetadataRecord name, MetadataRecord signature)
+{
+    /// <summary>
+    /// RVA (a 4-byte constant)
+    /// </summary>
+    public MetadataRecord Rva { get; init; } = rva;
+
+    /// <summary>
+    /// ImplFlags (a 2-byte bitmask of type MethodImplAttributes, §II.23.1.10)
+    /// </summary>
+    public MetadataRecord ImplFlags { get; init; } = implFlags;
+
+    /// <summary>
+    /// Flags (a 2-byte bitmask of type MethodAttributes, §II.23.1.10)
+    /// </summary>
+    /// <returns></returns>
+    public MetadataRecord Flags { get; init; } = flags;
+
+    /// <summary>
+    /// Name (an index into the String heap)
+    /// </summary>
+    public MetadataRecord Name { get; init; } = name;
+
+    /// <summary>
+    /// Signature (an index into the Blob heap)
+    /// </summary>
+    /// <returns></returns>
+    public MetadataRecord Signature { get; init; } = signature;
+}

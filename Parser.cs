@@ -15,6 +15,7 @@ public class Parser(string path)
     private readonly Dictionary<string, Dictionary<string, MetadataRecord>> _metadata = new();
 
     public MetadataModule Module = null!;
+    public List<TypeRef> TyperefTable = [];
 
     public Dictionary<string, Dictionary<string, MetadataRecord>> Parse()
     {
@@ -296,12 +297,13 @@ public class Parser(string path)
 
         if (tableStream is not null)
         {
-            ParseTablesHeader(metadataRoot, tableStream);
+            ParseTablesHeader(tableStream);
         }
     }
 
-    private void ParseTablesHeader(Dictionary<string, MetadataRecord> metadataRoot, MetadataRecord tableStream)
+    private void ParseTablesHeader(MetadataRecord tableStream)
     {
+        // II.24.2.6 #~ stream
         var fileOffset = tableStream.Children!["file_offset"].IntValue;
         _cursor = fileOffset;
 
@@ -336,6 +338,7 @@ public class Parser(string path)
             }
         }
 
+        // II.22.30 Module : 0x00 
         var stringHeapSize = GetHeapIndexSize("String");
         var guidHeapSize = GetHeapIndexSize("GUID");
         Module = new MetadataModule
@@ -347,6 +350,20 @@ public class Parser(string path)
             new MetadataRecord(guidHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(guidHeapSize))
         );
 
+        // II.22.38 TypeRef : 0x01
+        var typeRefRowCount = rowCounts[0x01];
+        var tableIndexSize1A = GetTableIndexSize(0x1A);
+        for (var i = 0; i < typeRefRowCount; i++)
+        {
+            // page 275, ResolutionScope: 2 bits to encode tag, index 26 (0x1A)_
+            var resolutionScope = new MetadataRecord(tableIndexSize1A == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(tableIndexSize1A));
+            var typeName = new MetadataRecord(stringHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(stringHeapSize));
+            var typeNamespace = new MetadataRecord(stringHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(stringHeapSize));
+
+            TyperefTable.Add(new TypeRef(resolutionScope, typeName, typeNamespace));
+        }
+
+        // II.22.26 MethodDef : 0x06
         const int methodDefIndex = 0x06; // MethodDef table index
         var methodDefRowCount = rowCounts[methodDefIndex]; // Number of methods
         var methodDefRowSize = CalculateMethodDefRowSize();
