@@ -18,7 +18,7 @@ public class VirtualMachine
 
     public void Execute(byte[] code)
     {
-        var a = 0xFE18;
+        // var a = 0xFE18;
         Console.WriteLine("Code: " + string.Join(" ", code.Take(10).Select(x => x.ToString("X2"))));
 
         _code = code;

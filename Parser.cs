@@ -339,13 +339,13 @@ public class Parser(string path)
         var stringHeapSize = GetHeapIndexSize("String");
         var guidHeapSize = GetHeapIndexSize("GUID");
         Module = new MetadataModule
-        {
-            Generation = new MetadataRecord(TokenType.Short, _cursor, GetNext(2)),
-            Name = new MetadataRecord(stringHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(stringHeapSize)),
-            Mvid = new MetadataRecord(guidHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(guidHeapSize)),
-            EncId = new MetadataRecord(guidHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(guidHeapSize)),
-            EncBaseId = new MetadataRecord(guidHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(guidHeapSize))
-        };
+        (
+            new MetadataRecord(TokenType.Short, _cursor, GetNext(2)),
+            new MetadataRecord(stringHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(stringHeapSize)),
+            new MetadataRecord(guidHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(guidHeapSize)),
+            new MetadataRecord(guidHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(guidHeapSize)),
+            new MetadataRecord(guidHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(guidHeapSize))
+        );
 
         const int methodDefIndex = 0x06; // MethodDef table index
         var methodDefRowCount = rowCounts[methodDefIndex]; // Number of methods
