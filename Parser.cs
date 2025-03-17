@@ -16,6 +16,7 @@ public class Parser(string path)
 
     public MetadataModule Module = null!;
     public List<TypeRef> TyperefTable = [];
+    public List<TypeDef> TypeDefTable = [];
 
     public Dictionary<string, Dictionary<string, MetadataRecord>> Parse()
     {
@@ -361,6 +362,35 @@ public class Parser(string path)
             var typeNamespace = new MetadataRecord(stringHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(stringHeapSize));
 
             TyperefTable.Add(new TypeRef(resolutionScope, typeName, typeNamespace));
+        }
+
+        // TODO: somethings off, verify the values
+
+        // II.22.37 TypeDef : 0x02
+        var typeDefRowCount = rowCounts[0x02]; // Get number of TypeDefs
+        var typeDefExtendsSize = GetTableIndexSize(0x01); // TypeRef Table size (for Extends column)
+        var fieldTableIndexSize = GetTableIndexSize(0x04); // Field Table index size
+        var methodTableIndexSize = GetTableIndexSize(0x06); // MethodDef Table index size
+        for (var i = 0; i < typeDefRowCount; i++)
+        {
+            var flags = new MetadataRecord(TokenType.Int, _cursor, GetNext(4)); // 4-byte Flags
+            var typeName = new MetadataRecord(stringHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(stringHeapSize));
+            var typeNamespace = new MetadataRecord(stringHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(stringHeapSize));
+            var extends = new MetadataRecord(typeDefExtendsSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(typeDefExtendsSize));
+            var fieldList = new MetadataRecord(fieldTableIndexSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(fieldTableIndexSize));
+            var methodList = new MetadataRecord(methodTableIndexSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(methodTableIndexSize));
+
+            // Check if this TypeDef actually has methods before trying to parse
+            if (methodList.Value.Length > 0)
+            {
+                Console.WriteLine($"TypeDef {i + 1}: Methods start at index {methodList.Value}");
+            }
+            else
+            {
+                Console.WriteLine($"TypeDef {i + 1}: No methods");
+            }
+
+            TypeDefTable.Add(new TypeDef(flags, typeName, typeNamespace, extends, fieldList, methodList));
         }
 
         // II.22.26 MethodDef : 0x06

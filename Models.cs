@@ -48,9 +48,74 @@ public class MetadataModule(MetadataRecord generation, MetadataRecord name, Meta
 /// </summary>
 public class TypeRef(MetadataRecord resolutionScope, MetadataRecord typeName, MetadataRecord typeNamespace)
 {
+    /// <summary>
+    /// ResolutionScope (an index into a Module, ModuleRef, AssemblyRef or TypeRef table,
+    /// or null; more precisely, a ResolutionScope (§II.24.2.6) coded index)
+    /// </summary>
     public MetadataRecord ResolutionScope { get; } = resolutionScope;
+
+    /// <summary>
+    /// TypeName (an index into the String heap)
+    /// </summary>
     public MetadataRecord TypeName { get; } = typeName;
+
+    /// <summary>
+    /// TypeNamespace (an index into the String heap
+    /// </summary>
     public MetadataRecord TypeNamespace { get; } = typeNamespace;
+}
+
+/// <summary>
+/// II.22.37 TypeDef : 0x02
+/// The first row of the TypeDef table represents the pseudo class that acts as parent for functions
+/// and variables defined at module scope.
+/// </summary>
+public class TypeDef(
+    MetadataRecord flags,
+    MetadataRecord typeName,
+    MetadataRecord typeNamespace,
+    MetadataRecord extends,
+    MetadataRecord fieldList,
+    MetadataRecord methodList)
+{
+    /// <summary>
+    /// Flags (a 4-byte bitmask of type TypeAttributes, §II.23.1.15)
+    /// </summary>
+    public MetadataRecord Flags { get; } = flags;
+
+    /// <summary>
+    /// TypeName (an index into the String heap)
+    /// </summary>
+    public MetadataRecord TypeName { get; } = typeName;
+
+    /// <summary>
+    /// TypeNamespace (an index into the String heap)
+    /// </summary>
+    public MetadataRecord TypeNamespace { get; } = typeNamespace;
+
+    /// <summary>
+    /// Extends (an index into the TypeDef, TypeRef, or TypeSpec table; more precisely, a
+    /// TypeDefOrRef (§II.24.2.6) coded index)
+    /// </summary>
+    public MetadataRecord Extends { get; } = extends;
+
+    /// <summary>
+    /// FieldList (an index into the Field table; it marks the first of a contiguous run of
+    /// Fields owned by this Type). The run continues to the smaller of:
+    /// - the last row of the Field table
+    /// - the next run of Fields, found by inspecting the FieldList of the next row
+    ///   in this TypeDef table
+    /// </summary>
+    public MetadataRecord FieldList { get; } = fieldList;
+
+    /// <summary>
+    /// MethodList (an index into the MethodDef table; it marks the first of a continguous
+    /// run of Methods owned by this Type). The run continues to the smaller of:
+    /// - the last row of the MethodDef table
+    /// - the next run of Methods, found by inspecting the MethodList of the next
+    ///   row in this TypeDef table
+    /// </summary>
+    public MetadataRecord MethodList { get; } = methodList;
 }
 
 /// <summary>
