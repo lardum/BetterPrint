@@ -121,7 +121,13 @@ public class TypeDef(
 /// <summary>
 /// II.22.26 MethodDef : 0x06
 /// </summary>
-public class MethodDef(MetadataRecord rva, MetadataRecord implFlags, MetadataRecord flags, MetadataRecord name, MetadataRecord signature)
+public class MethodDef(
+    MetadataRecord rva,
+    MetadataRecord implFlags,
+    MetadataRecord flags,
+    MetadataRecord name,
+    MetadataRecord signature,
+    MetadataRecord paramList)
 {
     /// <summary>
     /// RVA (a 4-byte constant)
@@ -149,4 +155,6 @@ public class MethodDef(MetadataRecord rva, MetadataRecord implFlags, MetadataRec
     /// </summary>
     /// <returns></returns>
     public MetadataRecord Signature { get; init; } = signature;
+
+    public MetadataRecord ParamList { get; } = paramList;
 }

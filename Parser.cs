@@ -17,6 +17,7 @@ public class Parser(string path)
     public MetadataModule Module = null!;
     public List<TypeRef> TyperefTable = [];
     public List<TypeDef> TypeDefTable = [];
+    public List<MethodDef> MethodDefTable = [];
 
     public Dictionary<string, Dictionary<string, MetadataRecord>> Parse()
     {
@@ -382,15 +383,32 @@ public class Parser(string path)
             TypeDefTable.Add(new TypeDef(flags, typeName, typeNamespace, extends, fieldList, null!));
         }
 
+        var blobHeapSize = GetHeapIndexSize("Blob");
         // II.22.26 MethodDef : 0x06
         const int methodDefIndex = 0x06; // MethodDef table index
         var methodDefRowCount = rowCounts[methodDefIndex]; // Number of methods
         var methodDefRowSize = CalculateMethodDefRowSize();
+        var expectedCursorSize = _cursor + methodDefRowSize * methodDefRowCount;
 
         for (var i = 0; i < methodDefRowCount; i++)
         {
+            var rva = new MetadataRecord(TokenType.Int, _cursor, GetNext(4));
+            var implFlags = new MetadataRecord(TokenType.Short, _cursor, GetNext(2));
+            var flags = new MetadataRecord(TokenType.Short, _cursor, GetNext(2));
+            var name = new MetadataRecord(TokenType.Bytes, _cursor, GetNext(stringHeapSize));
+            var signature = new MetadataRecord(blobHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(blobHeapSize));
+            // TODO: FIX 
+            var paramList = new MetadataRecord(
+                TokenType.Short, //GetTableIndexSize(0x08) == 2 ? TokenType.Short : TokenType.Int,
+                _cursor,
+                GetNext(2) //GetTableIndexSize(0x08))
+            );
+
+            MethodDefTable.Add(new MethodDef(rva, implFlags, flags, name, signature, paramList));
         }
 
+        Console.WriteLine($"Actual Cursor value vs expected after parsing MethodDef Table {_cursor} and expected: {expectedCursorSize}");
+        _cursor = (int)expectedCursorSize;
         return;
 
         // The HeapSizes field is a bitvector that encodes the width of indexes into the various heaps. If bit 0 is
