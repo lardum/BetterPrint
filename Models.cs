@@ -158,3 +158,24 @@ public class MethodDef(
 
     public MetadataRecord ParamList { get; } = paramList;
 }
+
+/// <summary>
+/// II.22.33 Param : 0x08
+/// </summary>
+public class Param(MetadataRecord flags, MetadataRecord sequence, MetadataRecord name)
+{
+    /// <summary>
+    /// Flags (a 2-byte bitmask of type ParamAttributes, §II.23.1.13)
+    /// </summary>
+    public MetadataRecord Flags { get; } = flags;
+
+    /// <summary>
+    /// Sequence (a 2-byte constant)
+    /// </summary>
+    public MetadataRecord Sequence { get; } = sequence;
+
+    /// <summary>
+    /// Name (an index into the String heap)
+    /// </summary>
+    public MetadataRecord Name { get; } = name;
+}

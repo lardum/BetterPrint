@@ -18,6 +18,7 @@ public class Parser(string path)
     public List<TypeRef> TyperefTable = [];
     public List<TypeDef> TypeDefTable = [];
     public List<MethodDef> MethodDefTable = [];
+    public List<Param> ParamTable = [];
 
     public Dictionary<string, Dictionary<string, MetadataRecord>> Parse()
     {
@@ -385,10 +386,7 @@ public class Parser(string path)
 
         var blobHeapSize = GetHeapIndexSize("Blob");
         // II.22.26 MethodDef : 0x06
-        const int methodDefIndex = 0x06; // MethodDef table index
-        var methodDefRowCount = rowCounts[methodDefIndex]; // Number of methods
-        var methodDefRowSize = CalculateMethodDefRowSize();
-        var expectedCursorSize = _cursor + methodDefRowSize * methodDefRowCount;
+        var methodDefRowCount = rowCounts[0x06]; // Number of methods
 
         for (var i = 0; i < methodDefRowCount; i++)
         {
@@ -407,8 +405,17 @@ public class Parser(string path)
             MethodDefTable.Add(new MethodDef(rva, implFlags, flags, name, signature, paramList));
         }
 
-        Console.WriteLine($"Actual Cursor value vs expected after parsing MethodDef Table {_cursor} and expected: {expectedCursorSize}");
-        _cursor = (int)expectedCursorSize;
+        // II.22.33 Param : 0x08
+        var paramRowCount = rowCounts[0x08];
+        for (var i = 0; i < paramRowCount; i++)
+        {
+            var flags = new MetadataRecord(TokenType.Short, _cursor, GetNext(2));
+            var sequence = new MetadataRecord(TokenType.Bytes, _cursor, GetNext(2));
+            var name = new MetadataRecord(TokenType.Short, _cursor, GetNext(stringHeapSize));
+            ParamTable.Add(new Param(flags, sequence, name));
+        }
+
+        Console.WriteLine(_cursor);
         return;
 
         // The HeapSizes field is a bitvector that encodes the width of indexes into the various heaps. If bit 0 is
@@ -432,21 +439,6 @@ public class Parser(string path)
         {
             var maskValid = children["mask_valid"].LongValue;
             return ((maskValid & (1L << tableId)) != 0) ? 4 : 2;
-        }
-
-        int CalculateMethodDefRowSize()
-        {
-            var stringIndexSize = GetHeapIndexSize("String");
-            var blobIndexSize = GetHeapIndexSize("Blob");
-            var paramTableIndexSize = GetTableIndexSize(0x08); // Param Table
-
-            // RVA (4 bytes)
-            // ImplFlags (2 bytes)
-            // Flags (2 bytes)
-            // Name (String Index) → 2 bytes (since HeapOffsetSizes: 0x00)
-            // Signature (Blob Index) → 2 bytes
-            // ParamList (Table Index) → 4 bytes (since the Param table exists)
-            return 4 + 2 + 2 + stringIndexSize + blobIndexSize + paramTableIndexSize;
         }
     }
 
