@@ -53,12 +53,32 @@ public class Parser(string path)
         // var rawDataSize = codeSection.Children!["size_of_raw_data"].IntValue;
         // var codeBytes = FileBytes.Skip(pointerToRawData).Take(rawDataSize).ToArray();
 
+        var vm = new VirtualMachine();
+
         foreach (var mdt in MethodDefTable)
         {
             var fileOffset = mdt.Rva.IntValue - virtualAddress + pointerToRawData;
-            Console.WriteLine(fileOffset);
-            var a = BitConverter.ToString(FileBytes.Skip(fileOffset).Take(10).ToArray());
-            Console.WriteLine(a);
+            var firstByte = FileBytes[fileOffset];
+            var isTinyHeader = (firstByte & 0x3) == 0x2;
+            var isFatHeader = (firstByte & 0x3) == 0x3;
+
+            var codeSize = 0;
+            if (isTinyHeader)
+            {
+                codeSize = (firstByte >> 2); // Upper 6 bits store size
+            }
+
+            if (isFatHeader)
+            {
+                codeSize = BinaryPrimitives.ReadInt32LittleEndian(FileBytes.AsSpan(fileOffset + 4));
+            }
+
+            var methodEnd = fileOffset + codeSize;
+
+            // Console.WriteLine($"Start {fileOffset}, end: {methodEnd}");
+            vm.Execute(FileBytes.Skip(fileOffset).Take(methodEnd - fileOffset).ToArray());
+            
+            break;
         }
 
         return _metadata;

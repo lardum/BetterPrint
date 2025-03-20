@@ -7,19 +7,18 @@ public class VirtualMachine
 {
     private byte[] _code = [];
 
-    public VirtualMachine(Dictionary<string, Dictionary<string, MetadataRecord>> il)
-    {
-        var codeSection = il["sections"][".text"];
-        var rawDataPointer = codeSection.Children!["pointer_to_raw_data"].IntValue;
-        var rawDataSize = codeSection.Children!["size_of_raw_data"].IntValue;
-        // Console.WriteLine($"Raw data pointer: {rawDataPointer}, and its size {rawDataSize}");
-        // var codeBytes = parser.FileBytes.Skip(rawDataPointer).Take(rawDataSize).ToArray();
-    }
+    // public VirtualMachine(Dictionary<string, Dictionary<string, MetadataRecord>> il)
+    // {
+    //     var codeSection = il["sections"][".text"];
+    //     var rawDataPointer = codeSection.Children!["pointer_to_raw_data"].IntValue;
+    //     var rawDataSize = codeSection.Children!["size_of_raw_data"].IntValue;
+    //     // Console.WriteLine($"Raw data pointer: {rawDataPointer}, and its size {rawDataSize}");
+    //     // var codeBytes = parser.FileBytes.Skip(rawDataPointer).Take(rawDataSize).ToArray();
+    // }
 
     public void Execute(byte[] code)
     {
-        // var a = 0xFE18;
-        Console.WriteLine("Code: " + string.Join(" ", code.Take(10).Select(x => x.ToString("X2"))));
+        Console.WriteLine(BitConverter.ToString(code));
 
         _code = code;
         var cursor = 0;
