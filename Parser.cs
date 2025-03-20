@@ -14,11 +14,11 @@ public class Parser(string path)
     private readonly bool _debug = false;
     private readonly Dictionary<string, Dictionary<string, MetadataRecord>> _metadata = new();
 
-    public MetadataModule Module = null!;
-    public List<TypeRef> TyperefTable = [];
-    public List<TypeDef> TypeDefTable = [];
-    public List<MethodDef> MethodDefTable = [];
-    public List<Param> ParamTable = [];
+    private MetadataModule Module = null!;
+    private List<TypeRef> TyperefTable = [];
+    private List<TypeDef> TypeDefTable = [];
+    private List<MethodDef> MethodDefTable = [];
+    private List<Param> ParamTable = [];
 
     public Dictionary<string, Dictionary<string, MetadataRecord>> Parse()
     {
@@ -34,10 +34,32 @@ public class Parser(string path)
             PrintDebug(_metadata);
         }
 
+        var tables = new
+        {
+            Module,
+            TyperefTable,
+            TypeDefTable,
+            MethodDefTable,
+            ParamTable
+        };
+
+        // Console.WriteLine(JsonSerializer.Serialize(tables, new JsonSerializerOptions { WriteIndented = true }));
+
         var codeSection = _metadata["sections"][".text"];
-        var rawDataPointer = codeSection.Children!["pointer_to_raw_data"].IntValue;
-        var rawDataSize = codeSection.Children!["size_of_raw_data"].IntValue;
-        var codeBytes = FileBytes.Skip(rawDataPointer).Take(rawDataSize).ToArray();
+
+        var virtualAddress = codeSection.Children!["virtual_address"].IntValue;
+        var pointerToRawData = codeSection.Children!["pointer_to_raw_data"].IntValue;
+
+        // var rawDataSize = codeSection.Children!["size_of_raw_data"].IntValue;
+        // var codeBytes = FileBytes.Skip(pointerToRawData).Take(rawDataSize).ToArray();
+
+        foreach (var mdt in MethodDefTable)
+        {
+            var fileOffset = mdt.Rva.IntValue - virtualAddress + pointerToRawData;
+            Console.WriteLine(fileOffset);
+            var a = BitConverter.ToString(FileBytes.Skip(fileOffset).Take(10).ToArray());
+            Console.WriteLine(a);
+        }
 
         return _metadata;
     }
@@ -415,7 +437,6 @@ public class Parser(string path)
             ParamTable.Add(new Param(flags, sequence, name));
         }
 
-        Console.WriteLine(_cursor);
         return;
 
         // The HeapSizes field is a bitvector that encodes the width of indexes into the various heaps. If bit 0 is
