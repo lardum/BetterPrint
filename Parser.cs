@@ -55,6 +55,8 @@ public class Parser(string path)
 
         var vm = new VirtualMachine();
 
+        File.WriteAllText("./bytes.txt", BitConverter.ToString(FileBytes));
+
         foreach (var mdt in MethodDefTable)
         {
             var fileOffset = mdt.Rva.IntValue - virtualAddress + pointerToRawData;
@@ -75,10 +77,12 @@ public class Parser(string path)
 
             var methodEnd = fileOffset + codeSize;
 
+            Console.WriteLine($"Len: {methodEnd - fileOffset}");
+
             // Console.WriteLine($"Start {fileOffset}, end: {methodEnd}");
             vm.Execute(FileBytes.Skip(fileOffset).Take(methodEnd - fileOffset).ToArray());
-            
-            break;
+
+            // break;
         }
 
         return _metadata;

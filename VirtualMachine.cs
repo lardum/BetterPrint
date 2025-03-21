@@ -23,6 +23,7 @@ public class VirtualMachine
         _code = code;
         var cursor = 0;
 
+        return;
         while (cursor < 10) //_code.Length)
         {
             var opcode = GetNext();
