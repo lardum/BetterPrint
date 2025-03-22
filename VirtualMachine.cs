@@ -18,7 +18,7 @@ public class VirtualMachine
 
     public void Execute(byte[] code)
     {
-        Console.WriteLine(BitConverter.ToString(code));
+        Console.WriteLine($"Len: {code.Length} | " + BitConverter.ToString(code));
 
         _code = code;
         var cursor = 0;

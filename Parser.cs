@@ -34,24 +34,20 @@ public class Parser(string path)
             PrintDebug(_metadata);
         }
 
-        var tables = new
-        {
-            Module,
-            TyperefTable,
-            TypeDefTable,
-            MethodDefTable,
-            ParamTable
-        };
-
+        // var tables = new
+        // {
+        //     Module,
+        //     TyperefTable,
+        //     TypeDefTable,
+        //     MethodDefTable,
+        //     ParamTable
+        // };
         // Console.WriteLine(JsonSerializer.Serialize(tables, new JsonSerializerOptions { WriteIndented = true }));
 
         var codeSection = _metadata["sections"][".text"];
 
         var virtualAddress = codeSection.Children!["virtual_address"].IntValue;
         var pointerToRawData = codeSection.Children!["pointer_to_raw_data"].IntValue;
-
-        // var rawDataSize = codeSection.Children!["size_of_raw_data"].IntValue;
-        // var codeBytes = FileBytes.Skip(pointerToRawData).Take(rawDataSize).ToArray();
 
         var vm = new VirtualMachine();
 
@@ -70,19 +66,16 @@ public class Parser(string path)
                 codeSize = (firstByte >> 2); // Upper 6 bits store size
             }
 
+            var codeOffset = fileOffset + 1;
+
             if (isFatHeader)
             {
-                codeSize = BinaryPrimitives.ReadInt32LittleEndian(FileBytes.AsSpan(fileOffset + 4));
+                codeSize = BinaryPrimitives.ReadInt32LittleEndian(FileBytes.AsSpan(codeOffset + 4));
             }
 
-            var methodEnd = fileOffset + codeSize;
+            var methodEnd = codeOffset + codeSize;
 
-            Console.WriteLine($"Len: {methodEnd - fileOffset}");
-
-            // Console.WriteLine($"Start {fileOffset}, end: {methodEnd}");
-            vm.Execute(FileBytes.Skip(fileOffset).Take(methodEnd - fileOffset).ToArray());
-
-            // break;
+            vm.Execute(FileBytes.Skip(codeOffset).Take(methodEnd - codeOffset).ToArray());
         }
 
         return _metadata;
