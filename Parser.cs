@@ -76,6 +76,8 @@ public class Parser(string path)
             var methodEnd = codeOffset + codeSize;
 
             vm.Execute(FileBytes.Skip(codeOffset).Take(methodEnd - codeOffset).ToArray());
+
+            break;
         }
 
         return _metadata;
@@ -105,7 +107,7 @@ public class Parser(string path)
     {
         return new Dictionary<string, MetadataRecord>
         {
-            { Consts.PeParts.DosHeader, new MetadataRecord(TokenType.ByteText, _cursor, GetNext(128)) }
+            { Consts.PeParts.DosHeader, new MetadataRecord(MetadataType.ByteText, _cursor, GetNext(128)) }
         };
     }
 
@@ -122,14 +124,14 @@ public class Parser(string path)
 
         var peFileHeader = new Dictionary<string, MetadataRecord>
         {
-            { "pe_signature", new MetadataRecord(TokenType.ByteText, _cursor, GetNext(4)) },
-            { "machine", new MetadataRecord(TokenType.Bytes, _cursor, GetNext(2)) },
-            { "number_of_sections", new MetadataRecord(TokenType.Short, _cursor, GetNext(2)) },
-            { "time_date_stamp", new MetadataRecord(TokenType.DateTime, _cursor, GetNext(4)) },
-            { "pointer_to_symbol_table", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "number_of_symbols", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "optional_header_size", new MetadataRecord(TokenType.Short, _cursor, GetNext(2)) },
-            { "characteristics", new MetadataRecord(TokenType.Binary, _cursor, GetNext(2)) }
+            { "pe_signature", new MetadataRecord(MetadataType.ByteText, _cursor, GetNext(4)) },
+            { "machine", new MetadataRecord(MetadataType.Bytes, _cursor, GetNext(2)) },
+            { "number_of_sections", new MetadataRecord(MetadataType.Short, _cursor, GetNext(2)) },
+            { "time_date_stamp", new MetadataRecord(MetadataType.DateTime, _cursor, GetNext(4)) },
+            { "pointer_to_symbol_table", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "number_of_symbols", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "optional_header_size", new MetadataRecord(MetadataType.Short, _cursor, GetNext(2)) },
+            { "characteristics", new MetadataRecord(MetadataType.Binary, _cursor, GetNext(2)) }
         };
 
         return peFileHeader;
@@ -139,33 +141,33 @@ public class Parser(string path)
     {
         var optionalHeader = new Dictionary<string, MetadataRecord>
         {
-            { "magic", new MetadataRecord(TokenType.Bytes, _cursor, GetNext(2)) },
-            { "major_linker_version", new MetadataRecord(TokenType.Byte, _cursor, GetNext()) }, // Should be 6 but is 48?
-            { "minor_linker_version", new MetadataRecord(TokenType.Byte, _cursor, GetNext()) },
-            { "size_of_code", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "size_of_initialized_data", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "size_of_uninitialized_data", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "entry_point_rva", new MetadataRecord(TokenType.Bytes, _cursor, GetNext(4)) },
-            { "base_of_code", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "base_of_data", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "nt_fields", new MetadataRecord(TokenType.Bytes, _cursor, GetNext(68)) }, // II.25.2.3.3 Pe header data directories
-            { "export_table", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "import_table", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "resource_table", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "exception_table", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "certificate_table", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "base_relocation_table", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "debug", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "copyright", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "global_ptr", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "tls_table", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "load_config_table", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "bound_import", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "iat", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "delay_import_descriptor", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "clr_runtime_header_rva", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "clr_runtime_header_size", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "reserved", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) }
+            { "magic", new MetadataRecord(MetadataType.Bytes, _cursor, GetNext(2)) },
+            { "major_linker_version", new MetadataRecord(MetadataType.Byte, _cursor, GetNext()) }, // Should be 6 but is 48?
+            { "minor_linker_version", new MetadataRecord(MetadataType.Byte, _cursor, GetNext()) },
+            { "size_of_code", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "size_of_initialized_data", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "size_of_uninitialized_data", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "entry_point_rva", new MetadataRecord(MetadataType.Bytes, _cursor, GetNext(4)) },
+            { "base_of_code", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "base_of_data", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "nt_fields", new MetadataRecord(MetadataType.Bytes, _cursor, GetNext(68)) }, // II.25.2.3.3 Pe header data directories
+            { "export_table", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "import_table", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "resource_table", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "exception_table", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "certificate_table", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "base_relocation_table", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "debug", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "copyright", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "global_ptr", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "tls_table", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "load_config_table", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "bound_import", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "iat", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "delay_import_descriptor", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "clr_runtime_header_rva", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "clr_runtime_header_size", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "reserved", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) }
         };
 
         return optionalHeader;
@@ -188,16 +190,16 @@ public class Parser(string path)
 
             var sectionDetails = new Dictionary<string, MetadataRecord>
             {
-                { "name", new MetadataRecord(TokenType.ByteText, index + localCursor - 8, nameBytes) },
-                { "virtual_size", new MetadataRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
-                { "virtual_address", new MetadataRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
-                { "size_of_raw_data", new MetadataRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
-                { "pointer_to_raw_data", new MetadataRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
-                { "pointer_to_relocations", new MetadataRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
-                { "pointer_to_linenumbers", new MetadataRecord(TokenType.Int, index + localCursor, GetNextLocal(4)) },
-                { "number_of_relocations", new MetadataRecord(TokenType.Short, index + localCursor, GetNextLocal(2)) },
-                { "number_of_linenumbers", new MetadataRecord(TokenType.Short, index + localCursor, GetNextLocal(2)) },
-                { "characteristics", new MetadataRecord(TokenType.Binary, index + localCursor, GetNextLocal(4)) }
+                { "name", new MetadataRecord(MetadataType.ByteText, index + localCursor - 8, nameBytes) },
+                { "virtual_size", new MetadataRecord(MetadataType.Int, index + localCursor, GetNextLocal(4)) },
+                { "virtual_address", new MetadataRecord(MetadataType.Int, index + localCursor, GetNextLocal(4)) },
+                { "size_of_raw_data", new MetadataRecord(MetadataType.Int, index + localCursor, GetNextLocal(4)) },
+                { "pointer_to_raw_data", new MetadataRecord(MetadataType.Int, index + localCursor, GetNextLocal(4)) },
+                { "pointer_to_relocations", new MetadataRecord(MetadataType.Int, index + localCursor, GetNextLocal(4)) },
+                { "pointer_to_linenumbers", new MetadataRecord(MetadataType.Int, index + localCursor, GetNextLocal(4)) },
+                { "number_of_relocations", new MetadataRecord(MetadataType.Short, index + localCursor, GetNextLocal(2)) },
+                { "number_of_linenumbers", new MetadataRecord(MetadataType.Short, index + localCursor, GetNextLocal(2)) },
+                { "characteristics", new MetadataRecord(MetadataType.Binary, index + localCursor, GetNextLocal(4)) }
             };
 
             if (_debug)
@@ -207,7 +209,7 @@ public class Parser(string path)
                 Console.WriteLine(string.Join(", ", flags));
             }
 
-            sectionHeaders.Add(sectionName, new MetadataRecord(TokenType.Bytes, _cursor, sectionBytes, sectionDetails));
+            sectionHeaders.Add(sectionName, new MetadataRecord(MetadataType.Bytes, _cursor, sectionBytes, sectionDetails));
         }
 
         return sectionHeaders;
@@ -228,23 +230,23 @@ public class Parser(string path)
 
         var cliHeader = new Dictionary<string, MetadataRecord>
         {
-            { "size_of_header", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "major_runtime_version", new MetadataRecord(TokenType.Short, _cursor, GetNext(2)) },
-            { "minor_runtime_version", new MetadataRecord(TokenType.Short, _cursor, GetNext(2)) },
-            { "metadata_rva", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "metadata_size", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "flags", new MetadataRecord(TokenType.Bytes, _cursor, GetNext(4)) },
-            { "entry_point_token", new MetadataRecord(TokenType.Bytes, _cursor, GetNext(4)) },
-            { "resources_rva", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "resources_size", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "strong_name_signature_rva", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "strong_name_signature_size", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "code_manager_table_rva", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "code_manager_table_size", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "export_address_table_jumps_rva", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "export_address_table_jumps_size", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "managed_native_header_rva", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "managed_native_header_size", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "size_of_header", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "major_runtime_version", new MetadataRecord(MetadataType.Short, _cursor, GetNext(2)) },
+            { "minor_runtime_version", new MetadataRecord(MetadataType.Short, _cursor, GetNext(2)) },
+            { "metadata_rva", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "metadata_size", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "flags", new MetadataRecord(MetadataType.Bytes, _cursor, GetNext(4)) },
+            { "entry_point_token", new MetadataRecord(MetadataType.Bytes, _cursor, GetNext(4)) },
+            { "resources_rva", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "resources_size", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "strong_name_signature_rva", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "strong_name_signature_size", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "code_manager_table_rva", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "code_manager_table_size", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "export_address_table_jumps_rva", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "export_address_table_jumps_size", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "managed_native_header_rva", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "managed_native_header_size", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
         };
 
         return cliHeader;
@@ -260,11 +262,11 @@ public class Parser(string path)
 
         var metadataRoot = new Dictionary<string, MetadataRecord>()
         {
-            { "signature", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "major_version", new MetadataRecord(TokenType.Short, _cursor, GetNext(2)) },
-            { "minor_version", new MetadataRecord(TokenType.Short, _cursor, GetNext(2)) },
-            { "reserved", new MetadataRecord(TokenType.Bytes, _cursor, GetNext(4)) },
-            { "version_length", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
+            { "signature", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "major_version", new MetadataRecord(MetadataType.Short, _cursor, GetNext(2)) },
+            { "minor_version", new MetadataRecord(MetadataType.Short, _cursor, GetNext(2)) },
+            { "reserved", new MetadataRecord(MetadataType.Bytes, _cursor, GetNext(4)) },
+            { "version_length", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
         };
 
         // Read version string (null-terminated)
@@ -279,15 +281,15 @@ public class Parser(string path)
 
         var versionBytes = FileBytes.Skip(versionOffset).Take(versionEndOffset - versionOffset).ToArray();
 
-        metadataRoot.Add("version_string", new MetadataRecord(TokenType.ByteText, versionOffset, versionBytes));
+        metadataRoot.Add("version_string", new MetadataRecord(MetadataType.ByteText, versionOffset, versionBytes));
 
         // Align to 4-byte boundary
         var offset = versionOffset + versionBytes.Length;
         offset = (offset + 3) & ~3;
         _cursor = offset;
 
-        metadataRoot.Add("flags", new MetadataRecord(TokenType.Bytes, _cursor, GetNext(2)));
-        metadataRoot.Add("number_of_streams", new MetadataRecord(TokenType.Short, _cursor, GetNext(2)));
+        metadataRoot.Add("flags", new MetadataRecord(MetadataType.Bytes, _cursor, GetNext(2)));
+        metadataRoot.Add("number_of_streams", new MetadataRecord(MetadataType.Short, _cursor, GetNext(2)));
 
         if (_debug)
         {
@@ -321,13 +323,13 @@ public class Parser(string path)
             var fileOffset =
                 RvaToFileOffset(_metadata["cli_header"]["metadata_rva"].IntValue + BinaryPrimitives.ReadInt32LittleEndian(streamOffsetBytes));
             metadataRoot
-                .Add($"{streamName}", new MetadataRecord(TokenType.Bytes, index, FileBytes.Skip(index).Take(8 + nameBytes.Length).ToArray(),
+                .Add($"{streamName}", new MetadataRecord(MetadataType.Bytes, index, FileBytes.Skip(index).Take(8 + nameBytes.Length).ToArray(),
                     new Dictionary<string, MetadataRecord>
                     {
-                        { "offset", new MetadataRecord(TokenType.Int, index, streamOffsetBytes) },
-                        { "size", new MetadataRecord(TokenType.Int, index + 4, streamSizeBytes) },
-                        { "name", new MetadataRecord(TokenType.ByteText, index + 4, nameBytes) },
-                        { "file_offset", new MetadataRecord(TokenType.Int, index + 4, BitConverter.GetBytes(fileOffset)) }
+                        { "offset", new MetadataRecord(MetadataType.Int, index, streamOffsetBytes) },
+                        { "size", new MetadataRecord(MetadataType.Int, index + 4, streamSizeBytes) },
+                        { "name", new MetadataRecord(MetadataType.ByteText, index + 4, nameBytes) },
+                        { "file_offset", new MetadataRecord(MetadataType.Int, index + 4, BitConverter.GetBytes(fileOffset)) }
                     }));
 
             // Move to next stream header (align to 4-byte boundary)
@@ -351,13 +353,13 @@ public class Parser(string path)
 
         var children = new Dictionary<string, MetadataRecord>
         {
-            { "reserved", new MetadataRecord(TokenType.Int, _cursor, GetNext(4)) },
-            { "major_version", new MetadataRecord(TokenType.Byte, _cursor, GetNext()) },
-            { "minor_version", new MetadataRecord(TokenType.Byte, _cursor, GetNext()) },
-            { "heap_of_set_sizes", new MetadataRecord(TokenType.Byte, _cursor, GetNext()) },
-            { "reserved_2", new MetadataRecord(TokenType.Byte, _cursor, GetNext()) },
-            { "mask_valid", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) },
-            { "mask_sorted", new MetadataRecord(TokenType.Long, _cursor, GetNext(8)) }
+            { "reserved", new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)) },
+            { "major_version", new MetadataRecord(MetadataType.Byte, _cursor, GetNext()) },
+            { "minor_version", new MetadataRecord(MetadataType.Byte, _cursor, GetNext()) },
+            { "heap_of_set_sizes", new MetadataRecord(MetadataType.Byte, _cursor, GetNext()) },
+            { "reserved_2", new MetadataRecord(MetadataType.Byte, _cursor, GetNext()) },
+            { "mask_valid", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) },
+            { "mask_sorted", new MetadataRecord(MetadataType.Long, _cursor, GetNext(8)) }
         };
 
         // Parse table row counts (for each bit set in validTables)
@@ -385,11 +387,11 @@ public class Parser(string path)
         var guidHeapSize = GetHeapIndexSize("GUID");
         Module = new MetadataModule
         (
-            new MetadataRecord(TokenType.Short, _cursor, GetNext(2)),
-            new MetadataRecord(stringHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(stringHeapSize)),
-            new MetadataRecord(guidHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(guidHeapSize)),
-            new MetadataRecord(guidHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(guidHeapSize)),
-            new MetadataRecord(guidHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(guidHeapSize))
+            new MetadataRecord(MetadataType.Short, _cursor, GetNext(2)),
+            new MetadataRecord(stringHeapSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(stringHeapSize)),
+            new MetadataRecord(guidHeapSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(guidHeapSize)),
+            new MetadataRecord(guidHeapSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(guidHeapSize)),
+            new MetadataRecord(guidHeapSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(guidHeapSize))
         );
 
         // II.22.38 TypeRef : 0x01
@@ -398,9 +400,10 @@ public class Parser(string path)
         for (var i = 0; i < typeRefRowCount; i++)
         {
             // page 275, ResolutionScope: 2 bits to encode tag, index 26 (0x1A)_
-            var resolutionScope = new MetadataRecord(tableIndexSize1A == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(tableIndexSize1A));
-            var typeName = new MetadataRecord(stringHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(stringHeapSize));
-            var typeNamespace = new MetadataRecord(stringHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(stringHeapSize));
+            var resolutionScope =
+                new MetadataRecord(tableIndexSize1A == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(tableIndexSize1A));
+            var typeName = new MetadataRecord(stringHeapSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(stringHeapSize));
+            var typeNamespace = new MetadataRecord(stringHeapSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(stringHeapSize));
 
             TyperefTable.Add(new TypeRef(resolutionScope, typeName, typeNamespace));
         }
@@ -412,11 +415,12 @@ public class Parser(string path)
         var methodTableIndexSize = GetTableIndexSize(0x06); // MethodDef Table index size
         for (var i = 0; i < typeDefRowCount; i++)
         {
-            var flags = new MetadataRecord(TokenType.Int, _cursor, GetNext(4)); // 4-byte Flags
-            var typeName = new MetadataRecord(stringHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(stringHeapSize));
-            var typeNamespace = new MetadataRecord(stringHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(stringHeapSize));
-            var extends = new MetadataRecord(typeDefExtendsSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(typeDefExtendsSize));
-            var fieldList = new MetadataRecord(fieldTableIndexSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(fieldTableIndexSize));
+            var flags = new MetadataRecord(MetadataType.Int, _cursor, GetNext(4)); // 4-byte Flags
+            var typeName = new MetadataRecord(stringHeapSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(stringHeapSize));
+            var typeNamespace = new MetadataRecord(stringHeapSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(stringHeapSize));
+            var extends = new MetadataRecord(typeDefExtendsSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(typeDefExtendsSize));
+            var fieldList = new MetadataRecord(fieldTableIndexSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor,
+                GetNext(fieldTableIndexSize));
             // var methodList = new MetadataRecord(methodTableIndexSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(methodTableIndexSize));
 
             // IDK
@@ -429,14 +433,14 @@ public class Parser(string path)
 
         for (var i = 0; i < methodDefRowCount; i++)
         {
-            var rva = new MetadataRecord(TokenType.Int, _cursor, GetNext(4));
-            var implFlags = new MetadataRecord(TokenType.Short, _cursor, GetNext(2));
-            var flags = new MetadataRecord(TokenType.Short, _cursor, GetNext(2));
-            var name = new MetadataRecord(TokenType.Bytes, _cursor, GetNext(stringHeapSize));
-            var signature = new MetadataRecord(blobHeapSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(blobHeapSize));
+            var rva = new MetadataRecord(MetadataType.Int, _cursor, GetNext(4));
+            var implFlags = new MetadataRecord(MetadataType.Short, _cursor, GetNext(2));
+            var flags = new MetadataRecord(MetadataType.Short, _cursor, GetNext(2));
+            var name = new MetadataRecord(MetadataType.Bytes, _cursor, GetNext(stringHeapSize));
+            var signature = new MetadataRecord(blobHeapSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(blobHeapSize));
             // TODO: FIX 
             var paramList = new MetadataRecord(
-                TokenType.Short, //GetTableIndexSize(0x08) == 2 ? TokenType.Short : TokenType.Int,
+                MetadataType.Short, //GetTableIndexSize(0x08) == 2 ? TokenType.Short : TokenType.Int,
                 _cursor,
                 GetNext(2) //GetTableIndexSize(0x08))
             );
@@ -448,9 +452,9 @@ public class Parser(string path)
         var paramRowCount = rowCounts[0x08];
         for (var i = 0; i < paramRowCount; i++)
         {
-            var flags = new MetadataRecord(TokenType.Short, _cursor, GetNext(2));
-            var sequence = new MetadataRecord(TokenType.Bytes, _cursor, GetNext(2));
-            var name = new MetadataRecord(TokenType.Short, _cursor, GetNext(stringHeapSize));
+            var flags = new MetadataRecord(MetadataType.Short, _cursor, GetNext(2));
+            var sequence = new MetadataRecord(MetadataType.Bytes, _cursor, GetNext(2));
+            var name = new MetadataRecord(MetadataType.Short, _cursor, GetNext(stringHeapSize));
             ParamTable.Add(new Param(flags, sequence, name));
         }
 
@@ -495,7 +499,7 @@ public class Parser(string path)
     }
 }
 
-public record MetadataRecord(TokenType Type, int Index, byte[] Value, Dictionary<string, MetadataRecord>? Children = null)
+public record MetadataRecord(MetadataType Type, int Index, byte[] Value, Dictionary<string, MetadataRecord>? Children = null)
 {
     public string ValueAsciiString() => Encoding.ASCII.GetString(Value);
     public string ValueBitString() => string.Join(" ", Value.Reverse().Select(x => x.ToString("B")));
@@ -504,24 +508,24 @@ public record MetadataRecord(TokenType Type, int Index, byte[] Value, Dictionary
     public string StringValue
         => Type switch
         {
-            TokenType.Binary => ValueBitString(),
-            TokenType.Byte => Value[0].ToString(),
-            TokenType.Short => BinaryPrimitives.ReadInt16LittleEndian(Value).ToString(),
-            TokenType.Int => BinaryPrimitives.ReadInt32LittleEndian(Value).ToString(),
-            TokenType.Long => BinaryPrimitives.ReadInt64LittleEndian(Value).ToString(),
-            TokenType.DateTime => DateTimeOffset.FromUnixTimeSeconds(BinaryPrimitives.ReadUInt32LittleEndian(Value)).UtcDateTime.ToString("u"),
-            TokenType.ByteText => ValueAsciiString(),
-            TokenType.Bytes => ValueHexString(),
+            MetadataType.Binary => ValueBitString(),
+            MetadataType.Byte => Value[0].ToString(),
+            MetadataType.Short => BinaryPrimitives.ReadInt16LittleEndian(Value).ToString(),
+            MetadataType.Int => BinaryPrimitives.ReadInt32LittleEndian(Value).ToString(),
+            MetadataType.Long => BinaryPrimitives.ReadInt64LittleEndian(Value).ToString(),
+            MetadataType.DateTime => DateTimeOffset.FromUnixTimeSeconds(BinaryPrimitives.ReadUInt32LittleEndian(Value)).UtcDateTime.ToString("u"),
+            MetadataType.ByteText => ValueAsciiString(),
+            MetadataType.Bytes => ValueHexString(),
             _ => ValueHexString(),
         };
 
-    public short ShortValue => Type == TokenType.Short ? BinaryPrimitives.ReadInt16LittleEndian(Value) : (short)0;
-    public int IntValue => Type == TokenType.Int ? BinaryPrimitives.ReadInt32LittleEndian(Value) : 0;
-    public long LongValue => Type == TokenType.Long ? BinaryPrimitives.ReadInt64LittleEndian(Value) : 0;
+    public short ShortValue => Type == MetadataType.Short ? BinaryPrimitives.ReadInt16LittleEndian(Value) : (short)0;
+    public int IntValue => Type == MetadataType.Int ? BinaryPrimitives.ReadInt32LittleEndian(Value) : 0;
+    public long LongValue => Type == MetadataType.Long ? BinaryPrimitives.ReadInt64LittleEndian(Value) : 0;
     public string HexValue => BitConverter.ToString(Value.Reverse().ToArray());
 }
 
-public enum TokenType
+public enum MetadataType
 {
     Binary,
     Byte,
