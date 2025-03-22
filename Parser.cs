@@ -34,6 +34,11 @@ public class Parser(string path)
             PrintDebug(_metadata);
         }
 
+        var strings = _metadata["metadata_root"]["#Strings"];
+        var stringsOffset = strings.Children!["file_offset"].IntValue;
+        var stringsSize = strings.Children!["file_offset"].IntValue;
+        var stringsBytes = FileBytes.Skip(stringsOffset).Take(stringsSize).ToArray();
+
         // var tables = new
         // {
         //     Module,
@@ -49,7 +54,7 @@ public class Parser(string path)
         var virtualAddress = codeSection.Children!["virtual_address"].IntValue;
         var pointerToRawData = codeSection.Children!["pointer_to_raw_data"].IntValue;
 
-        var vm = new VirtualMachine();
+        var vm = new VirtualMachine(stringsBytes);
 
         File.WriteAllText("./bytes.txt", BitConverter.ToString(FileBytes));
 

@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Text;
 
 namespace BetterPrint;
 
@@ -7,6 +8,13 @@ namespace BetterPrint;
 // https://en.wikipedia.org/wiki/List_of_CIL_instructions
 public class VirtualMachine
 {
+    private readonly byte[] _strings = [];
+
+    public VirtualMachine(byte[] strings)
+    {
+        _strings = strings;
+    }
+
     private byte[] _bytecode = [];
 
     public void Execute(byte[] code)
@@ -38,7 +46,9 @@ public class VirtualMachine
                     var table = BinaryPrimitives.ReadUInt32LittleEndian(_bytecode.Skip(cursor).Take(4).ToArray());
                     var tableIndex = (int)(table & 0x00FFFFFF);
                     var tableType = GetTokenType((int)(table >> 24));
-                    Console.WriteLine($"ldstr, {table}");
+                    var stringValue = ReadStringAt((uint)tableIndex); // fix index
+                    Console.WriteLine($"ldstr, {table} and string value: {stringValue}");
+                    cursor += 4;
                     break;
                 default:
                     Console.WriteLine($"Unknown opcode {opcode:X2}");
@@ -57,6 +67,22 @@ public class VirtualMachine
     }
 
     private TokenType GetTokenType(int token) => (TokenType)(token & 0xff000000);
+
+    protected virtual string ReadStringAt(uint index)
+    {
+        int length = 0;
+        int start = (int)index;
+
+        for (int i = start;; i++)
+        {
+            if (_strings[i] == 0)
+                break;
+
+            length++;
+        }
+
+        return Encoding.UTF8.GetString(_strings, start, length);
+    }
 }
 
 public enum TokenType : uint
