@@ -5,7 +5,8 @@
 // https://en.wikipedia.org/wiki/List_of_CIL_instructions
 public class VirtualMachine
 {
-    private byte[] _code = [];
+    private byte[] _bytecode = [];
+    private Stack<int> _stack = new Stack<int>();
 
     // public VirtualMachine(Dictionary<string, Dictionary<string, MetadataRecord>> il)
     // {
@@ -18,9 +19,19 @@ public class VirtualMachine
 
     public void Execute(byte[] code)
     {
+        // For hello world:
+        // 00-72-01-00-00-70-28-0D-00-00-0A-00-2A
+        // 00 -> nop
+        // 72 -> ldstr (read string) 
+        // take next 4 bytes 01-00-00-70
+        // 28 -> Ldc_I4 (Pushes a supplied value of type int32)
+        // 0D-00-00-0A
+        // 00 -> nop
+        // 2A -> ret (return) 
+
         Console.WriteLine($"Len: {code.Length} | " + BitConverter.ToString(code));
 
-        _code = code;
+        _bytecode = code;
         var cursor = 0;
 
         return;
@@ -47,7 +58,7 @@ public class VirtualMachine
 
         byte GetNext()
         {
-            var res = _code.Skip(cursor).Take(1).First();
+            var res = _bytecode.Skip(cursor).Take(1).First();
             cursor++;
             return res;
         }
