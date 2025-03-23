@@ -1,0 +1,2154 @@
+{
+  "DosHeader": {
+    "RawBytes": {
+      "Type": 3,
+      "Index": 0,
+      "Value": "TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAA4fug4AtAnNIbgBTM0hVGhpcyBwcm9ncmFtIGNhbm5vdCBiZSBydW4gaW4gRE9TIG1vZGUuDQ0KJAAAAAAAAAA=",
+      "Children": null,
+      "StringValue": "MZ?\u0000\u0003\u0000\u0000\u0000\u0004\u0000\u0000\u0000??\u0000\u0000?\u0000\u0000\u0000\u0000\u0000\u0000\u0000@\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000?\u0000\u0000\u0000\u000E\u001F?\u000E\u0000?\t?!?\u0001L?!This program cannot be run in DOS mode.\r\r\n$\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00-00-00-00-24-0A-0D-0D-2E-65-64-6F-6D-20-53-4F-44-20-6E-69-20-6E-75-72-20-65-62-20-74-6F-6E-6E-61-63-20-6D-61-72-67-6F-72-70-20-73-69-68-54-21-CD-4C-01-B8-21-CD-09-B4-00-0E-BA-1F-0E-00-00-00-80-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-40-00-00-00-00-00-00-00-B8-00-00-FF-FF-00-00-00-04-00-00-00-03-00-90-5A-4D"
+    }
+  },
+  "PeFileHeader": {
+    "PeSignature": {
+      "Type": 3,
+      "Index": 128,
+      "Value": "UEUAAA==",
+      "Children": null,
+      "StringValue": "PE\u0000\u0000",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-45-50"
+    },
+    "Machine": {
+      "Type": 2,
+      "Index": 132,
+      "Value": "TAE=",
+      "Children": null,
+      "StringValue": "01-4C",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "01-4C"
+    },
+    "NumberOfSections": {
+      "Type": 4,
+      "Index": 134,
+      "Value": "AwA=",
+      "Children": null,
+      "StringValue": "3",
+      "ShortValue": 3,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-03"
+    },
+    "TimeDateStamp": {
+      "Type": 7,
+      "Index": 136,
+      "Value": "BjZOzA==",
+      "Children": null,
+      "StringValue": "2078-08-14 04:41:42Z",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "CC-4E-36-06"
+    },
+    "PointerToSymbolTable": {
+      "Type": 5,
+      "Index": 140,
+      "Value": "AAAAAA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00"
+    },
+    "NumberOfSymbols": {
+      "Type": 5,
+      "Index": 144,
+      "Value": "AAAAAA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00"
+    },
+    "OptionalHeaderSize": {
+      "Type": 4,
+      "Index": 148,
+      "Value": "4AA=",
+      "Children": null,
+      "StringValue": "224",
+      "ShortValue": 224,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-E0"
+    },
+    "Characteristics": {
+      "Type": 0,
+      "Index": 150,
+      "Value": "IgA=",
+      "Children": null,
+      "StringValue": "0 100010",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-22"
+    }
+  },
+  "PeOptionalHeader": {
+    "Magic": {
+      "Type": 2,
+      "Index": 152,
+      "Value": "CwE=",
+      "Children": null,
+      "StringValue": "01-0B",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "01-0B"
+    },
+    "MajorLinkerVersion": {
+      "Type": 1,
+      "Index": 154,
+      "Value": "MA==",
+      "Children": null,
+      "StringValue": "48",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "30"
+    },
+    "MinorLinkerVersion": {
+      "Type": 1,
+      "Index": 155,
+      "Value": "AA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00"
+    },
+    "SizeOfCode": {
+      "Type": 5,
+      "Index": 156,
+      "Value": "AAgAAA==",
+      "Children": null,
+      "StringValue": "2048",
+      "ShortValue": 0,
+      "IntValue": 2048,
+      "LongValue": 0,
+      "HexValue": "00-00-08-00"
+    },
+    "SizeOfInitializedData": {
+      "Type": 5,
+      "Index": 160,
+      "Value": "AAgAAA==",
+      "Children": null,
+      "StringValue": "2048",
+      "ShortValue": 0,
+      "IntValue": 2048,
+      "LongValue": 0,
+      "HexValue": "00-00-08-00"
+    },
+    "SizeofUnInitializedData": {
+      "Type": 5,
+      "Index": 164,
+      "Value": "AAAAAA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00"
+    },
+    "EntryPointRva": {
+      "Type": 2,
+      "Index": 168,
+      "Value": "4iYAAA==",
+      "Children": null,
+      "StringValue": "00-00-26-E2",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-26-E2"
+    },
+    "BaseOfCode": {
+      "Type": 5,
+      "Index": 172,
+      "Value": "ACAAAA==",
+      "Children": null,
+      "StringValue": "8192",
+      "ShortValue": 0,
+      "IntValue": 8192,
+      "LongValue": 0,
+      "HexValue": "00-00-20-00"
+    },
+    "BaseOfData": {
+      "Type": 5,
+      "Index": 176,
+      "Value": "AEAAAA==",
+      "Children": null,
+      "StringValue": "16384",
+      "ShortValue": 0,
+      "IntValue": 16384,
+      "LongValue": 0,
+      "HexValue": "00-00-40-00"
+    },
+    "NtFields": {
+      "Type": 2,
+      "Index": 180,
+      "Value": "AABAAAAgAAAAAgAABAAAAAAAAAAEAAAAAAAAAACAAAAAAgAAAAAAAAMAYIUAABAAABAAAAAAEAAAEAAAAAAAABAAAAA=",
+      "Children": null,
+      "StringValue": "00-00-00-10-00-00-00-00-00-00-10-00-00-10-00-00-00-00-10-00-00-10-00-00-85-60-00-03-00-00-00-00-00-00-02-00-00-00-80-00-00-00-00-00-00-00-00-04-00-00-00-00-00-00-00-04-00-00-02-00-00-00-20-00-00-40-00-00",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-10-00-00-00-00-00-00-10-00-00-10-00-00-00-00-10-00-00-10-00-00-85-60-00-03-00-00-00-00-00-00-02-00-00-00-80-00-00-00-00-00-00-00-00-04-00-00-00-00-00-00-00-04-00-00-02-00-00-00-20-00-00-40-00-00"
+    },
+    "ExportTable": {
+      "Type": 6,
+      "Index": 248,
+      "Value": "AAAAAAAAAAA=",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00-00-00-00-00"
+    },
+    "ImportTable": {
+      "Type": 6,
+      "Index": 256,
+      "Value": "kCYAAE8AAAA=",
+      "Children": null,
+      "StringValue": "339302426256",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 339302426256,
+      "HexValue": "00-00-00-4F-00-00-26-90"
+    },
+    "ResourceTable": {
+      "Type": 6,
+      "Index": 264,
+      "Value": "AEAAAGQFAAA=",
+      "Children": null,
+      "StringValue": "5927054884864",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 5927054884864,
+      "HexValue": "00-00-05-64-00-00-40-00"
+    },
+    "ExceptionTable": {
+      "Type": 6,
+      "Index": 272,
+      "Value": "AAAAAAAAAAA=",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00-00-00-00-00"
+    },
+    "CertificateTable": {
+      "Type": 6,
+      "Index": 280,
+      "Value": "AAAAAAAAAAA=",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00-00-00-00-00"
+    },
+    "BaseRelocationTable": {
+      "Type": 6,
+      "Index": 288,
+      "Value": "AGAAAAwAAAA=",
+      "Children": null,
+      "StringValue": "51539632128",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 51539632128,
+      "HexValue": "00-00-00-0C-00-00-60-00"
+    },
+    "Debug": {
+      "Type": 6,
+      "Index": 296,
+      "Value": "xCUAAFQAAAA=",
+      "Children": null,
+      "StringValue": "360777262532",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 360777262532,
+      "HexValue": "00-00-00-54-00-00-25-C4"
+    },
+    "Copyright": {
+      "Type": 6,
+      "Index": 304,
+      "Value": "AAAAAAAAAAA=",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00-00-00-00-00"
+    },
+    "GlobalPtr": {
+      "Type": 6,
+      "Index": 312,
+      "Value": "AAAAAAAAAAA=",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00-00-00-00-00"
+    },
+    "TlsTable": {
+      "Type": 6,
+      "Index": 320,
+      "Value": "AAAAAAAAAAA=",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00-00-00-00-00"
+    },
+    "LoadConfigTable": {
+      "Type": 6,
+      "Index": 328,
+      "Value": "AAAAAAAAAAA=",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00-00-00-00-00"
+    },
+    "BoundImport": {
+      "Type": 6,
+      "Index": 336,
+      "Value": "AAAAAAAAAAA=",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00-00-00-00-00"
+    },
+    "Iat": {
+      "Type": 6,
+      "Index": 344,
+      "Value": "ACAAAAgAAAA=",
+      "Children": null,
+      "StringValue": "34359746560",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 34359746560,
+      "HexValue": "00-00-00-08-00-00-20-00"
+    },
+    "DelayImportDescriptor": {
+      "Type": 6,
+      "Index": 352,
+      "Value": "AAAAAAAAAAA=",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00-00-00-00-00"
+    },
+    "ClrRuntimeHeaderRva": {
+      "Type": 5,
+      "Index": 360,
+      "Value": "CCAAAA==",
+      "Children": null,
+      "StringValue": "8200",
+      "ShortValue": 0,
+      "IntValue": 8200,
+      "LongValue": 0,
+      "HexValue": "00-00-20-08"
+    },
+    "ClrRuntimeHeaderSize": {
+      "Type": 5,
+      "Index": 364,
+      "Value": "SAAAAA==",
+      "Children": null,
+      "StringValue": "72",
+      "ShortValue": 0,
+      "IntValue": 72,
+      "LongValue": 0,
+      "HexValue": "00-00-00-48"
+    },
+    "Reserved": {
+      "Type": 6,
+      "Index": 368,
+      "Value": "AAAAAAAAAAA=",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00-00-00-00-00"
+    }
+  },
+  "SectionHeaders": [
+    {
+      "Name": {
+        "Type": 3,
+        "Index": 376,
+        "Value": "LnRleHQAAAA=",
+        "Children": null,
+        "StringValue": ".text\u0000\u0000\u0000",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00-00-74-78-65-74-2E"
+      },
+      "VirtualSize": {
+        "Type": 5,
+        "Index": 384,
+        "Value": "6AYAAA==",
+        "Children": null,
+        "StringValue": "1768",
+        "ShortValue": 0,
+        "IntValue": 1768,
+        "LongValue": 0,
+        "HexValue": "00-00-06-E8"
+      },
+      "VirtualAddress": {
+        "Type": 5,
+        "Index": 388,
+        "Value": "ACAAAA==",
+        "Children": null,
+        "StringValue": "8192",
+        "ShortValue": 0,
+        "IntValue": 8192,
+        "LongValue": 0,
+        "HexValue": "00-00-20-00"
+      },
+      "SizeOfRawData": {
+        "Type": 5,
+        "Index": 392,
+        "Value": "AAgAAA==",
+        "Children": null,
+        "StringValue": "2048",
+        "ShortValue": 0,
+        "IntValue": 2048,
+        "LongValue": 0,
+        "HexValue": "00-00-08-00"
+      },
+      "PointerToRawData": {
+        "Type": 5,
+        "Index": 396,
+        "Value": "AAIAAA==",
+        "Children": null,
+        "StringValue": "512",
+        "ShortValue": 0,
+        "IntValue": 512,
+        "LongValue": 0,
+        "HexValue": "00-00-02-00"
+      },
+      "PointerToRelocations": {
+        "Type": 5,
+        "Index": 400,
+        "Value": "AAAAAA==",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00-00-00"
+      },
+      "PointerToLineNumbers": {
+        "Type": 5,
+        "Index": 404,
+        "Value": "AAAAAA==",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00-00-00"
+      },
+      "NumberOfRelocations": {
+        "Type": 4,
+        "Index": 408,
+        "Value": "AAA=",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00"
+      },
+      "NumberOfLineNumbers": {
+        "Type": 4,
+        "Index": 410,
+        "Value": "AAA=",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00"
+      },
+      "Characteristics": {
+        "Type": 0,
+        "Index": 412,
+        "Value": "IAAAYA==",
+        "Children": null,
+        "StringValue": "1100000 0 0 100000",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "60-00-00-20"
+      }
+    },
+    {
+      "Name": {
+        "Type": 3,
+        "Index": 416,
+        "Value": "LnJzcmMAAAA=",
+        "Children": null,
+        "StringValue": ".rsrc\u0000\u0000\u0000",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00-00-63-72-73-72-2E"
+      },
+      "VirtualSize": {
+        "Type": 5,
+        "Index": 424,
+        "Value": "ZAUAAA==",
+        "Children": null,
+        "StringValue": "1380",
+        "ShortValue": 0,
+        "IntValue": 1380,
+        "LongValue": 0,
+        "HexValue": "00-00-05-64"
+      },
+      "VirtualAddress": {
+        "Type": 5,
+        "Index": 428,
+        "Value": "AEAAAA==",
+        "Children": null,
+        "StringValue": "16384",
+        "ShortValue": 0,
+        "IntValue": 16384,
+        "LongValue": 0,
+        "HexValue": "00-00-40-00"
+      },
+      "SizeOfRawData": {
+        "Type": 5,
+        "Index": 432,
+        "Value": "AAYAAA==",
+        "Children": null,
+        "StringValue": "1536",
+        "ShortValue": 0,
+        "IntValue": 1536,
+        "LongValue": 0,
+        "HexValue": "00-00-06-00"
+      },
+      "PointerToRawData": {
+        "Type": 5,
+        "Index": 436,
+        "Value": "AAoAAA==",
+        "Children": null,
+        "StringValue": "2560",
+        "ShortValue": 0,
+        "IntValue": 2560,
+        "LongValue": 0,
+        "HexValue": "00-00-0A-00"
+      },
+      "PointerToRelocations": {
+        "Type": 5,
+        "Index": 440,
+        "Value": "AAAAAA==",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00-00-00"
+      },
+      "PointerToLineNumbers": {
+        "Type": 5,
+        "Index": 444,
+        "Value": "AAAAAA==",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00-00-00"
+      },
+      "NumberOfRelocations": {
+        "Type": 4,
+        "Index": 448,
+        "Value": "AAA=",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00"
+      },
+      "NumberOfLineNumbers": {
+        "Type": 4,
+        "Index": 450,
+        "Value": "AAA=",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00"
+      },
+      "Characteristics": {
+        "Type": 0,
+        "Index": 452,
+        "Value": "QAAAQA==",
+        "Children": null,
+        "StringValue": "1000000 0 0 1000000",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "40-00-00-40"
+      }
+    },
+    {
+      "Name": {
+        "Type": 3,
+        "Index": 456,
+        "Value": "LnJlbG9jAAA=",
+        "Children": null,
+        "StringValue": ".reloc\u0000\u0000",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00-63-6F-6C-65-72-2E"
+      },
+      "VirtualSize": {
+        "Type": 5,
+        "Index": 464,
+        "Value": "DAAAAA==",
+        "Children": null,
+        "StringValue": "12",
+        "ShortValue": 0,
+        "IntValue": 12,
+        "LongValue": 0,
+        "HexValue": "00-00-00-0C"
+      },
+      "VirtualAddress": {
+        "Type": 5,
+        "Index": 468,
+        "Value": "AGAAAA==",
+        "Children": null,
+        "StringValue": "24576",
+        "ShortValue": 0,
+        "IntValue": 24576,
+        "LongValue": 0,
+        "HexValue": "00-00-60-00"
+      },
+      "SizeOfRawData": {
+        "Type": 5,
+        "Index": 472,
+        "Value": "AAIAAA==",
+        "Children": null,
+        "StringValue": "512",
+        "ShortValue": 0,
+        "IntValue": 512,
+        "LongValue": 0,
+        "HexValue": "00-00-02-00"
+      },
+      "PointerToRawData": {
+        "Type": 5,
+        "Index": 476,
+        "Value": "ABAAAA==",
+        "Children": null,
+        "StringValue": "4096",
+        "ShortValue": 0,
+        "IntValue": 4096,
+        "LongValue": 0,
+        "HexValue": "00-00-10-00"
+      },
+      "PointerToRelocations": {
+        "Type": 5,
+        "Index": 480,
+        "Value": "AAAAAA==",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00-00-00"
+      },
+      "PointerToLineNumbers": {
+        "Type": 5,
+        "Index": 484,
+        "Value": "AAAAAA==",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00-00-00"
+      },
+      "NumberOfRelocations": {
+        "Type": 4,
+        "Index": 488,
+        "Value": "AAA=",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00"
+      },
+      "NumberOfLineNumbers": {
+        "Type": 4,
+        "Index": 490,
+        "Value": "AAA=",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00"
+      },
+      "Characteristics": {
+        "Type": 0,
+        "Index": 492,
+        "Value": "QAAAQg==",
+        "Children": null,
+        "StringValue": "1000010 0 0 1000000",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "42-00-00-40"
+      }
+    }
+  ],
+  "CliHeader": {
+    "SizeOfHeader": {
+      "Type": 5,
+      "Index": 520,
+      "Value": "SAAAAA==",
+      "Children": null,
+      "StringValue": "72",
+      "ShortValue": 0,
+      "IntValue": 72,
+      "LongValue": 0,
+      "HexValue": "00-00-00-48"
+    },
+    "MajorRuntimeVersion": {
+      "Type": 4,
+      "Index": 524,
+      "Value": "AgA=",
+      "Children": null,
+      "StringValue": "2",
+      "ShortValue": 2,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-02"
+    },
+    "MinorRuntimeVersion": {
+      "Type": 4,
+      "Index": 526,
+      "Value": "BQA=",
+      "Children": null,
+      "StringValue": "5",
+      "ShortValue": 5,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-05"
+    },
+    "MetadataRva": {
+      "Type": 5,
+      "Index": 528,
+      "Value": "aCAAAA==",
+      "Children": null,
+      "StringValue": "8296",
+      "ShortValue": 0,
+      "IntValue": 8296,
+      "LongValue": 0,
+      "HexValue": "00-00-20-68"
+    },
+    "MetadataSize": {
+      "Type": 5,
+      "Index": 532,
+      "Value": "XAUAAA==",
+      "Children": null,
+      "StringValue": "1372",
+      "ShortValue": 0,
+      "IntValue": 1372,
+      "LongValue": 0,
+      "HexValue": "00-00-05-5C"
+    },
+    "Flags": {
+      "Type": 2,
+      "Index": 536,
+      "Value": "AQAAAA==",
+      "Children": null,
+      "StringValue": "00-00-00-01",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-01"
+    },
+    "EntryPointToken": {
+      "Type": 2,
+      "Index": 540,
+      "Value": "AQAABg==",
+      "Children": null,
+      "StringValue": "06-00-00-01",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "06-00-00-01"
+    },
+    "ResourcesRva": {
+      "Type": 5,
+      "Index": 544,
+      "Value": "AAAAAA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00"
+    },
+    "ResourcesSize": {
+      "Type": 5,
+      "Index": 548,
+      "Value": "AAAAAA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00"
+    },
+    "StrongNameSignatureRva": {
+      "Type": 5,
+      "Index": 552,
+      "Value": "AAAAAA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00"
+    },
+    "StrongNameSignatureSize": {
+      "Type": 5,
+      "Index": 556,
+      "Value": "AAAAAA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00"
+    },
+    "CodeManagerTableRva": {
+      "Type": 5,
+      "Index": 560,
+      "Value": "AAAAAA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00"
+    },
+    "CodeManagerTableSize": {
+      "Type": 5,
+      "Index": 564,
+      "Value": "AAAAAA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00"
+    },
+    "ExportAddressTableJumpsRva": {
+      "Type": 5,
+      "Index": 568,
+      "Value": "AAAAAA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00"
+    },
+    "ExportAddressTableJumpsSize": {
+      "Type": 5,
+      "Index": 572,
+      "Value": "AAAAAA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00"
+    },
+    "ManagedNativeHeaderRva": {
+      "Type": 5,
+      "Index": 576,
+      "Value": "AAAAAA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00"
+    },
+    "ManagedNativeHeaderSize": {
+      "Type": 5,
+      "Index": 580,
+      "Value": "AAAAAA==",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00-00-00"
+    }
+  },
+  "MetadataRoot": {
+    "Flags": {
+      "Type": 2,
+      "Index": 644,
+      "Value": "AAA=",
+      "Children": null,
+      "StringValue": "00-00",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00"
+    },
+    "NumberOfStreams": {
+      "Type": 4,
+      "Index": 646,
+      "Value": "BQA=",
+      "Children": null,
+      "StringValue": "5",
+      "ShortValue": 5,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-05"
+    },
+    "VersionString": {
+      "Type": 3,
+      "Index": 632,
+      "Value": "djQuMC4zMDMxOQ==",
+      "Children": null,
+      "StringValue": "v4.0.30319",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "39-31-33-30-33-2E-30-2E-34-76"
+    },
+    "StreamHeaders": [
+      {
+        "Offset": {
+          "Type": 5,
+          "Index": 648,
+          "Value": "bAAAAA==",
+          "Children": null,
+          "StringValue": "108",
+          "ShortValue": 0,
+          "IntValue": 108,
+          "LongValue": 0,
+          "HexValue": "00-00-00-6C"
+        },
+        "Size": {
+          "Type": 5,
+          "Index": 652,
+          "Value": "vAEAAA==",
+          "Children": null,
+          "StringValue": "444",
+          "ShortValue": 0,
+          "IntValue": 444,
+          "LongValue": 0,
+          "HexValue": "00-00-01-BC"
+        },
+        "Name": {
+          "Type": 3,
+          "Index": 656,
+          "Value": "I34=",
+          "Children": null,
+          "StringValue": "#~",
+          "ShortValue": 0,
+          "IntValue": 0,
+          "LongValue": 0,
+          "HexValue": "7E-23"
+        },
+        "FileOffset": {
+          "Type": 5,
+          "Index": 0,
+          "Value": "1AIAAA==",
+          "Children": null,
+          "StringValue": "724",
+          "ShortValue": 0,
+          "IntValue": 724,
+          "LongValue": 0,
+          "HexValue": "00-00-02-D4"
+        }
+      },
+      {
+        "Offset": {
+          "Type": 5,
+          "Index": 660,
+          "Value": "KAIAAA==",
+          "Children": null,
+          "StringValue": "552",
+          "ShortValue": 0,
+          "IntValue": 552,
+          "LongValue": 0,
+          "HexValue": "00-00-02-28"
+        },
+        "Size": {
+          "Type": 5,
+          "Index": 664,
+          "Value": "KAIAAA==",
+          "Children": null,
+          "StringValue": "552",
+          "ShortValue": 0,
+          "IntValue": 552,
+          "LongValue": 0,
+          "HexValue": "00-00-02-28"
+        },
+        "Name": {
+          "Type": 3,
+          "Index": 668,
+          "Value": "I1N0cmluZ3M=",
+          "Children": null,
+          "StringValue": "#Strings",
+          "ShortValue": 0,
+          "IntValue": 0,
+          "LongValue": 0,
+          "HexValue": "73-67-6E-69-72-74-53-23"
+        },
+        "FileOffset": {
+          "Type": 5,
+          "Index": 0,
+          "Value": "kAQAAA==",
+          "Children": null,
+          "StringValue": "1168",
+          "ShortValue": 0,
+          "IntValue": 1168,
+          "LongValue": 0,
+          "HexValue": "00-00-04-90"
+        }
+      },
+      {
+        "Offset": {
+          "Type": 5,
+          "Index": 680,
+          "Value": "UAQAAA==",
+          "Children": null,
+          "StringValue": "1104",
+          "ShortValue": 0,
+          "IntValue": 1104,
+          "LongValue": 0,
+          "HexValue": "00-00-04-50"
+        },
+        "Size": {
+          "Type": 5,
+          "Index": 684,
+          "Value": "HAAAAA==",
+          "Children": null,
+          "StringValue": "28",
+          "ShortValue": 0,
+          "IntValue": 28,
+          "LongValue": 0,
+          "HexValue": "00-00-00-1C"
+        },
+        "Name": {
+          "Type": 3,
+          "Index": 688,
+          "Value": "I1VT",
+          "Children": null,
+          "StringValue": "#US",
+          "ShortValue": 0,
+          "IntValue": 0,
+          "LongValue": 0,
+          "HexValue": "53-55-23"
+        },
+        "FileOffset": {
+          "Type": 5,
+          "Index": 0,
+          "Value": "uAYAAA==",
+          "Children": null,
+          "StringValue": "1720",
+          "ShortValue": 0,
+          "IntValue": 1720,
+          "LongValue": 0,
+          "HexValue": "00-00-06-B8"
+        }
+      },
+      {
+        "Offset": {
+          "Type": 5,
+          "Index": 692,
+          "Value": "bAQAAA==",
+          "Children": null,
+          "StringValue": "1132",
+          "ShortValue": 0,
+          "IntValue": 1132,
+          "LongValue": 0,
+          "HexValue": "00-00-04-6C"
+        },
+        "Size": {
+          "Type": 5,
+          "Index": 696,
+          "Value": "EAAAAA==",
+          "Children": null,
+          "StringValue": "16",
+          "ShortValue": 0,
+          "IntValue": 16,
+          "LongValue": 0,
+          "HexValue": "00-00-00-10"
+        },
+        "Name": {
+          "Type": 3,
+          "Index": 700,
+          "Value": "I0dVSUQ=",
+          "Children": null,
+          "StringValue": "#GUID",
+          "ShortValue": 0,
+          "IntValue": 0,
+          "LongValue": 0,
+          "HexValue": "44-49-55-47-23"
+        },
+        "FileOffset": {
+          "Type": 5,
+          "Index": 0,
+          "Value": "1AYAAA==",
+          "Children": null,
+          "StringValue": "1748",
+          "ShortValue": 0,
+          "IntValue": 1748,
+          "LongValue": 0,
+          "HexValue": "00-00-06-D4"
+        }
+      },
+      {
+        "Offset": {
+          "Type": 5,
+          "Index": 708,
+          "Value": "fAQAAA==",
+          "Children": null,
+          "StringValue": "1148",
+          "ShortValue": 0,
+          "IntValue": 1148,
+          "LongValue": 0,
+          "HexValue": "00-00-04-7C"
+        },
+        "Size": {
+          "Type": 5,
+          "Index": 712,
+          "Value": "4AAAAA==",
+          "Children": null,
+          "StringValue": "224",
+          "ShortValue": 0,
+          "IntValue": 224,
+          "LongValue": 0,
+          "HexValue": "00-00-00-E0"
+        },
+        "Name": {
+          "Type": 3,
+          "Index": 716,
+          "Value": "I0Jsb2I=",
+          "Children": null,
+          "StringValue": "#Blob",
+          "ShortValue": 0,
+          "IntValue": 0,
+          "LongValue": 0,
+          "HexValue": "62-6F-6C-42-23"
+        },
+        "FileOffset": {
+          "Type": 5,
+          "Index": 0,
+          "Value": "5AYAAA==",
+          "Children": null,
+          "StringValue": "1764",
+          "ShortValue": 0,
+          "IntValue": 1764,
+          "LongValue": 0,
+          "HexValue": "00-00-06-E4"
+        }
+      }
+    ],
+    "TableStream": {
+      "Reserved": {
+        "Type": 5,
+        "Index": 724,
+        "Value": "AAAAAA==",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00-00-00"
+      },
+      "MajorVersion": {
+        "Type": 1,
+        "Index": 728,
+        "Value": "Ag==",
+        "Children": null,
+        "StringValue": "2",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "02"
+      },
+      "MinorVersion": {
+        "Type": 1,
+        "Index": 729,
+        "Value": "AA==",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00"
+      },
+      "HeapOfSetSizes": {
+        "Type": 1,
+        "Index": 730,
+        "Value": "AA==",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00"
+      },
+      "Reserved2": {
+        "Type": 1,
+        "Index": 731,
+        "Value": "AQ==",
+        "Children": null,
+        "StringValue": "1",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01"
+      },
+      "MaskValid": {
+        "Type": 6,
+        "Index": 732,
+        "Value": "RxUAAAkAAAA=",
+        "Children": null,
+        "StringValue": "38654711111",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 38654711111,
+        "HexValue": "00-00-00-09-00-00-15-47"
+      },
+      "MaskSorted": {
+        "Type": 6,
+        "Index": 740,
+        "Value": "APoBMwAWAAA=",
+        "Children": null,
+        "StringValue": "24190111578624",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 24190111578624,
+        "HexValue": "00-00-16-00-33-01-FA-00"
+      }
+    }
+  },
+  "Module": {
+    "Generation": {
+      "Type": 4,
+      "Index": 784,
+      "Value": "AAA=",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00"
+    },
+    "Name": {
+      "Type": 4,
+      "Index": 786,
+      "Value": "ngE=",
+      "Children": null,
+      "StringValue": "414",
+      "ShortValue": 414,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "01-9E"
+    },
+    "Mvid": {
+      "Type": 4,
+      "Index": 788,
+      "Value": "AQA=",
+      "Children": null,
+      "StringValue": "1",
+      "ShortValue": 1,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-01"
+    },
+    "EncId": {
+      "Type": 4,
+      "Index": 790,
+      "Value": "AAA=",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00"
+    },
+    "EncBaseId": {
+      "Type": 4,
+      "Index": 792,
+      "Value": "AAA=",
+      "Children": null,
+      "StringValue": "0",
+      "ShortValue": 0,
+      "IntValue": 0,
+      "LongValue": 0,
+      "HexValue": "00-00"
+    }
+  },
+  "TyperefTable": [
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 794,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 796,
+        "Value": "+wA=",
+        "Children": null,
+        "StringValue": "251",
+        "ShortValue": 251,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-FB"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 798,
+        "Value": "7AE=",
+        "Children": null,
+        "StringValue": "492",
+        "ShortValue": 492,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-EC"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 800,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 802,
+        "Value": "ZgE=",
+        "Children": null,
+        "StringValue": "358",
+        "ShortValue": 358,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-66"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 804,
+        "Value": "7AE=",
+        "Children": null,
+        "StringValue": "492",
+        "ShortValue": 492,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-EC"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 806,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 808,
+        "Value": "PQA=",
+        "Children": null,
+        "StringValue": "61",
+        "ShortValue": 61,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-3D"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 810,
+        "Value": "2QE=",
+        "Children": null,
+        "StringValue": "473",
+        "ShortValue": 473,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-D9"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 812,
+        "Value": "DwA=",
+        "Children": null,
+        "StringValue": "15",
+        "ShortValue": 15,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-0F"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 814,
+        "Value": "DAI=",
+        "Children": null,
+        "StringValue": "524",
+        "ShortValue": 524,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "02-0C"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 816,
+        "Value": "AAA=",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 818,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 820,
+        "Value": "aAA=",
+        "Children": null,
+        "StringValue": "104",
+        "ShortValue": 104,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-68"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 822,
+        "Value": "hAE=",
+        "Children": null,
+        "StringValue": "388",
+        "ShortValue": 388,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-84"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 824,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 826,
+        "Value": "TQE=",
+        "Children": null,
+        "StringValue": "333",
+        "ShortValue": 333,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-4D"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 828,
+        "Value": "wQE=",
+        "Children": null,
+        "StringValue": "449",
+        "ShortValue": 449,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-C1"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 830,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 832,
+        "Value": "xAA=",
+        "Children": null,
+        "StringValue": "196",
+        "ShortValue": 196,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-C4"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 834,
+        "Value": "wQE=",
+        "Children": null,
+        "StringValue": "449",
+        "ShortValue": 449,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-C1"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 836,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 838,
+        "Value": "gQA=",
+        "Children": null,
+        "StringValue": "129",
+        "ShortValue": 129,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-81"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 840,
+        "Value": "wQE=",
+        "Children": null,
+        "StringValue": "449",
+        "ShortValue": 449,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-C1"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 842,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 844,
+        "Value": "ngA=",
+        "Children": null,
+        "StringValue": "158",
+        "ShortValue": 158,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-9E"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 846,
+        "Value": "wQE=",
+        "Children": null,
+        "StringValue": "449",
+        "ShortValue": 449,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-C1"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 848,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 850,
+        "Value": "GwE=",
+        "Children": null,
+        "StringValue": "283",
+        "ShortValue": 283,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-1B"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 852,
+        "Value": "wQE=",
+        "Children": null,
+        "StringValue": "449",
+        "ShortValue": 449,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-C1"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 854,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 856,
+        "Value": "UQA=",
+        "Children": null,
+        "StringValue": "81",
+        "ShortValue": 81,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-51"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 858,
+        "Value": "wQE=",
+        "Children": null,
+        "StringValue": "449",
+        "ShortValue": 449,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-C1"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 860,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 862,
+        "Value": "4wA=",
+        "Children": null,
+        "StringValue": "227",
+        "ShortValue": 227,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-E3"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 864,
+        "Value": "7AE=",
+        "Children": null,
+        "StringValue": "492",
+        "ShortValue": 492,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-EC"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 866,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 868,
+        "Value": "IAI=",
+        "Children": null,
+        "StringValue": "544",
+        "ShortValue": 544,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "02-20"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 870,
+        "Value": "tQE=",
+        "Children": null,
+        "StringValue": "437",
+        "ShortValue": 437,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-B5"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 872,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 874,
+        "Value": "NAE=",
+        "Children": null,
+        "StringValue": "308",
+        "ShortValue": 308,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-34"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 876,
+        "Value": "7AE=",
+        "Children": null,
+        "StringValue": "492",
+        "ShortValue": 492,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-EC"
+      }
+    },
+    {
+      "ResolutionScope": {
+        "Type": 4,
+        "Index": 878,
+        "Value": "CgA=",
+        "Children": null,
+        "StringValue": "10",
+        "ShortValue": 10,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-0A"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 880,
+        "Value": "HAA=",
+        "Children": null,
+        "StringValue": "28",
+        "ShortValue": 28,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-1C"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 882,
+        "Value": "tQE=",
+        "Children": null,
+        "StringValue": "437",
+        "ShortValue": 437,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-B5"
+      }
+    }
+  ],
+  "TypeDefTable": [
+    {
+      "Flags": {
+        "Type": 5,
+        "Index": 884,
+        "Value": "AAAAAA==",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00-00-00"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 888,
+        "Value": "AQA=",
+        "Children": null,
+        "StringValue": "1",
+        "ShortValue": 1,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-01"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 890,
+        "Value": "AAA=",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00"
+      },
+      "Extends": {
+        "Type": 5,
+        "Index": 892,
+        "Value": "AAABAA==",
+        "Children": null,
+        "StringValue": "65536",
+        "ShortValue": 0,
+        "IntValue": 65536,
+        "LongValue": 0,
+        "HexValue": "00-01-00-00"
+      },
+      "FieldList": {
+        "Type": 4,
+        "Index": 896,
+        "Value": "AQA=",
+        "Children": null,
+        "StringValue": "1",
+        "ShortValue": 1,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-01"
+      },
+      "MethodList": null
+    },
+    {
+      "Flags": {
+        "Type": 5,
+        "Index": 898,
+        "Value": "AQAQAA==",
+        "Children": null,
+        "StringValue": "1048577",
+        "ShortValue": 0,
+        "IntValue": 1048577,
+        "LongValue": 0,
+        "HexValue": "00-10-00-01"
+      },
+      "TypeName": {
+        "Type": 4,
+        "Index": 902,
+        "Value": "rQE=",
+        "Children": null,
+        "StringValue": "429",
+        "ShortValue": 429,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-AD"
+      },
+      "TypeNamespace": {
+        "Type": 4,
+        "Index": 904,
+        "Value": "AAA=",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00"
+      },
+      "Extends": {
+        "Type": 5,
+        "Index": 906,
+        "Value": "NQABAA==",
+        "Children": null,
+        "StringValue": "65589",
+        "ShortValue": 0,
+        "IntValue": 65589,
+        "LongValue": 0,
+        "HexValue": "00-01-00-35"
+      },
+      "FieldList": {
+        "Type": 4,
+        "Index": 910,
+        "Value": "AQA=",
+        "Children": null,
+        "StringValue": "1",
+        "ShortValue": 1,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-01"
+      },
+      "MethodList": null
+    }
+  ],
+  "MethodDefTable": [
+    {
+      "Rva": {
+        "Type": 5,
+        "Index": 912,
+        "Value": "UCAAAA==",
+        "Children": null,
+        "StringValue": "8272",
+        "ShortValue": 0,
+        "IntValue": 8272,
+        "LongValue": 0,
+        "HexValue": "00-00-20-50"
+      },
+      "ImplFlags": {
+        "Type": 4,
+        "Index": 916,
+        "Value": "AAA=",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00"
+      },
+      "Flags": {
+        "Type": 4,
+        "Index": 918,
+        "Value": "lgA=",
+        "Children": null,
+        "StringValue": "150",
+        "ShortValue": 150,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-96"
+      },
+      "Name": {
+        "Type": 2,
+        "Index": 920,
+        "Value": "vAE=",
+        "Children": null,
+        "StringValue": "01-BC",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-BC"
+      },
+      "Signature": {
+        "Type": 4,
+        "Index": 922,
+        "Value": "KAA=",
+        "Children": null,
+        "StringValue": "40",
+        "ShortValue": 40,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-28"
+      },
+      "ParamList": {
+        "Type": 4,
+        "Index": 924,
+        "Value": "AQA=",
+        "Children": null,
+        "StringValue": "1",
+        "ShortValue": 1,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-01"
+      }
+    },
+    {
+      "Rva": {
+        "Type": 5,
+        "Index": 926,
+        "Value": "XiAAAA==",
+        "Children": null,
+        "StringValue": "8286",
+        "ShortValue": 0,
+        "IntValue": 8286,
+        "LongValue": 0,
+        "HexValue": "00-00-20-5E"
+      },
+      "ImplFlags": {
+        "Type": 4,
+        "Index": 930,
+        "Value": "AAA=",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00"
+      },
+      "Flags": {
+        "Type": 4,
+        "Index": 932,
+        "Value": "hhg=",
+        "Children": null,
+        "StringValue": "6278",
+        "ShortValue": 6278,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "18-86"
+      },
+      "Name": {
+        "Type": 2,
+        "Index": 934,
+        "Value": "0wE=",
+        "Children": null,
+        "StringValue": "01-D3",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "01-D3"
+      },
+      "Signature": {
+        "Type": 4,
+        "Index": 936,
+        "Value": "BgA=",
+        "Children": null,
+        "StringValue": "6",
+        "ShortValue": 6,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-06"
+      },
+      "ParamList": {
+        "Type": 4,
+        "Index": 938,
+        "Value": "AgA=",
+        "Children": null,
+        "StringValue": "2",
+        "ShortValue": 2,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-02"
+      }
+    }
+  ],
+  "ParamTable": [
+    {
+      "Flags": {
+        "Type": 4,
+        "Index": 940,
+        "Value": "AAA=",
+        "Children": null,
+        "StringValue": "0",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-00"
+      },
+      "Sequence": {
+        "Type": 2,
+        "Index": 942,
+        "Value": "AQA=",
+        "Children": null,
+        "StringValue": "00-01",
+        "ShortValue": 0,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "00-01"
+      },
+      "Name": {
+        "Type": 4,
+        "Index": 944,
+        "Value": "GwI=",
+        "Children": null,
+        "StringValue": "539",
+        "ShortValue": 539,
+        "IntValue": 0,
+        "LongValue": 0,
+        "HexValue": "02-1B"
+      }
+    }
+  ]
+}

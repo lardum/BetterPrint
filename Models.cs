@@ -111,6 +111,11 @@ public class MetadataRoot(
     public Metadata NumberOfStreams { get; set; } = null!;
     public Metadata VersionString { get; set; } = null!;
     public List<StreamHeader> StreamHeaders { get; set; } = [];
+
+    /// <summary>
+    /// ~# Stream
+    /// </summary>
+    public Stream TableStream { get; set; } = null!;
 }
 
 public record StreamHeader(

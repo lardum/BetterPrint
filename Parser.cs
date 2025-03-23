@@ -20,7 +20,6 @@ public class Parser(string path)
     public List<SectionHeader> SectionHeaders = [];
     public CliHeader CliHeader = null!;
     public MetadataRoot MetadataRoot = null!;
-
     public MetadataModule Module = null!;
     public List<TypeRef> TyperefTable = [];
     public List<TypeDef> TypeDefTable = [];
@@ -44,13 +43,20 @@ public class Parser(string path)
         var metadata = new
         {
             DosHeader,
+            PeFileHeader,
+            PeOptionalHeader,
+            SectionHeaders,
+            CliHeader,
+            MetadataRoot,
             Module,
             TyperefTable,
             TypeDefTable,
             MethodDefTable,
             ParamTable
         };
+
         // Console.WriteLine(JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
+        // File.WriteAllText("./metadata.json", JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
 
         var codeSection = SectionHeaders.First(x => x.Name.StringValue.Trim('\0') == ".text");
 
@@ -325,11 +331,11 @@ public class Parser(string path)
 
         if (newTableStream is not null)
         {
-            ParseTablesHeader(newTableStream);
+            ParseStreams(newTableStream);
         }
     }
 
-    private void ParseTablesHeader(StreamHeader tableStreamHeader)
+    private void ParseStreams(StreamHeader tableStreamHeader)
     {
         // II.24.2.6 #~ stream
         var fileOffset = tableStreamHeader.FileOffset.IntValue;
@@ -344,6 +350,8 @@ public class Parser(string path)
             new Metadata(MetadataType.Long, _cursor, GetNext(8)),
             new Metadata(MetadataType.Long, _cursor, GetNext(8))
         );
+
+        MetadataRoot.TableStream = stream;
 
         // Parse table row counts (for each bit set in validTables)
 
