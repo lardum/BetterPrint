@@ -335,16 +335,15 @@ public class Parser(string path)
         var fileOffset = tableStreamHeader.FileOffset.IntValue;
         _cursor = fileOffset;
 
-        var children = new Dictionary<string, Metadata>
-        {
-            { "reserved", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "major_version", new Metadata(MetadataType.Byte, _cursor, GetNext()) },
-            { "minor_version", new Metadata(MetadataType.Byte, _cursor, GetNext()) },
-            { "heap_of_set_sizes", new Metadata(MetadataType.Byte, _cursor, GetNext()) },
-            { "reserved_2", new Metadata(MetadataType.Byte, _cursor, GetNext()) },
-            { "mask_valid", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "mask_sorted", new Metadata(MetadataType.Long, _cursor, GetNext(8)) }
-        };
+        var stream = new Stream(
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Byte, _cursor, GetNext()),
+            new Metadata(MetadataType.Byte, _cursor, GetNext()),
+            new Metadata(MetadataType.Byte, _cursor, GetNext()),
+            new Metadata(MetadataType.Byte, _cursor, GetNext()),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8))
+        );
 
         // Parse table row counts (for each bit set in validTables)
 
@@ -356,7 +355,7 @@ public class Parser(string path)
         // Read the Rows array to get the row count for each existing table.
 
         // Store this information in a dictionary {table_name: row_count}.
-        var validTables = (ulong)children["mask_valid"].LongValue;
+        var validTables = (ulong)stream.MaskValid.LongValue;
         var rowCounts = new uint[64];
         for (var i = 0; i < 64; i++)
         {
@@ -450,7 +449,7 @@ public class Parser(string path)
         // HeapSize bit for a particular heap is not set, indexes into that heap are 2 bytes wide
         int GetHeapIndexSize(string heapType)
         {
-            var heapSize = children["heap_of_set_sizes"].IntValue;
+            var heapSize = stream.HeapOfSetSizes.IntValue;
 
             return heapType switch
             {
@@ -463,7 +462,7 @@ public class Parser(string path)
 
         int GetTableIndexSize(int tableId)
         {
-            var maskValid = children["mask_valid"].LongValue;
+            var maskValid = stream.MaskValid.LongValue;
             return ((maskValid & (1L << tableId)) != 0) ? 4 : 2;
         }
     }

@@ -110,7 +110,7 @@ public class MetadataRoot(
     public Metadata Flags { get; set; } = null!;
     public Metadata NumberOfStreams { get; set; } = null!;
     public Metadata VersionString { get; set; } = null!;
-    public  List<StreamHeader> StreamHeaders { get; set; } = [];
+    public List<StreamHeader> StreamHeaders { get; set; } = [];
 }
 
 public record StreamHeader(
@@ -118,6 +118,16 @@ public record StreamHeader(
     Metadata Size,
     Metadata Name,
     Metadata FileOffset
+);
+
+public record Stream(
+    Metadata Reserved,
+    Metadata MajorVersion,
+    Metadata MinorVersion,
+    Metadata HeapOfSetSizes,
+    Metadata Reserved2,
+    Metadata MaskValid,
+    Metadata MaskSorted
 );
 
 /// <summary>
