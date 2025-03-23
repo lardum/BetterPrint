@@ -9,44 +9,67 @@ namespace BetterPrint;
 /// Lfanew				4
 /// End					64
 /// </summary>
-public class DosHeader(MetadataRecord rawBytes)
+public class DosHeader(Metadata rawBytes)
 {
-    public MetadataRecord RawBytes { get; } = rawBytes;
+    public Metadata RawBytes { get; } = rawBytes;
 
     public uint GetLfanew()
         => BinaryPrimitives.ReadUInt32LittleEndian(RawBytes.Value.Skip(60).Take(4).ToArray());
 }
 
 /// <summary>
+/// II.25.2.2 PE file header
+/// </summary>
+public class PeFileHeader(
+    Metadata peSignature,
+    Metadata machine,
+    Metadata numberOfSections,
+    Metadata timeDateStamp,
+    Metadata pointerToSymbolTable,
+    Metadata numberOfSymbols,
+    Metadata optionalHeaderSize,
+    Metadata characteristics)
+{
+    public Metadata PeSignature { get; } = peSignature;
+    public Metadata Machine { get; } = machine;
+    public Metadata NumberOfSections { get; } = numberOfSections;
+    public Metadata TimeDateStamp { get; } = timeDateStamp;
+    public Metadata PointerToSymbolTable { get; } = pointerToSymbolTable;
+    public Metadata NumberOfSymbols { get; } = numberOfSymbols;
+    public Metadata OptionalHeaderSize { get; } = optionalHeaderSize;
+    public Metadata Characteristics { get; } = characteristics;
+}
+
+/// <summary>
 /// II.22.30 Module : 0x00
 /// </summary>
-public class MetadataModule(MetadataRecord generation, MetadataRecord name, MetadataRecord mvid, MetadataRecord encId, MetadataRecord encBaseId)
+public class MetadataModule(Metadata generation, Metadata name, Metadata mvid, Metadata encId, Metadata encBaseId)
 {
     /// <summary>
     /// Generation (a 2-byte value, reserved, shall be zero)
     /// </summary>
-    public MetadataRecord Generation { get; init; } = generation;
+    public Metadata Generation { get; init; } = generation;
 
     /// <summary>
     /// Name (an index into the String heap)
     /// </summary>
-    public MetadataRecord Name { get; init; } = name;
+    public Metadata Name { get; init; } = name;
 
     /// <summary>
     /// Mvid (an index into the Guid heap; simply a Guid used to distinguish between two
     /// versions of the same module)
     /// </summary>
-    public MetadataRecord Mvid { get; init; } = mvid;
+    public Metadata Mvid { get; init; } = mvid;
 
     /// <summary>
     /// EncId (an index into the Guid heap; reserved, shall be zero)
     /// </summary>
-    public MetadataRecord EncId { get; init; } = encId;
+    public Metadata EncId { get; init; } = encId;
 
     /// <summary>
     /// EncBaseId (an index into the Guid heap; reserved, shall be zero)
     /// </summary>
-    public MetadataRecord EncBaseId { get; init; } = encBaseId;
+    public Metadata EncBaseId { get; init; } = encBaseId;
 
     /// <summary>
     /// 1. The Module table shall contain one and only one row [ERROR]
@@ -63,23 +86,23 @@ public class MetadataModule(MetadataRecord generation, MetadataRecord name, Meta
 /// <summary>
 /// II.22.38 TypeRef : 0x01
 /// </summary>
-public class TypeRef(MetadataRecord resolutionScope, MetadataRecord typeName, MetadataRecord typeNamespace)
+public class TypeRef(Metadata resolutionScope, Metadata typeName, Metadata typeNamespace)
 {
     /// <summary>
     /// ResolutionScope (an index into a Module, ModuleRef, AssemblyRef or TypeRef table,
     /// or null; more precisely, a ResolutionScope (§II.24.2.6) coded index)
     /// </summary>
-    public MetadataRecord ResolutionScope { get; } = resolutionScope;
+    public Metadata ResolutionScope { get; } = resolutionScope;
 
     /// <summary>
     /// TypeName (an index into the String heap)
     /// </summary>
-    public MetadataRecord TypeName { get; } = typeName;
+    public Metadata TypeName { get; } = typeName;
 
     /// <summary>
     /// TypeNamespace (an index into the String heap
     /// </summary>
-    public MetadataRecord TypeNamespace { get; } = typeNamespace;
+    public Metadata TypeNamespace { get; } = typeNamespace;
 }
 
 /// <summary>
@@ -88,33 +111,33 @@ public class TypeRef(MetadataRecord resolutionScope, MetadataRecord typeName, Me
 /// and variables defined at module scope.
 /// </summary>
 public class TypeDef(
-    MetadataRecord flags,
-    MetadataRecord typeName,
-    MetadataRecord typeNamespace,
-    MetadataRecord extends,
-    MetadataRecord fieldList,
-    MetadataRecord methodList)
+    Metadata flags,
+    Metadata typeName,
+    Metadata typeNamespace,
+    Metadata extends,
+    Metadata fieldList,
+    Metadata methodList)
 {
     /// <summary>
     /// Flags (a 4-byte bitmask of type TypeAttributes, §II.23.1.15)
     /// </summary>
-    public MetadataRecord Flags { get; } = flags;
+    public Metadata Flags { get; } = flags;
 
     /// <summary>
     /// TypeName (an index into the String heap)
     /// </summary>
-    public MetadataRecord TypeName { get; } = typeName;
+    public Metadata TypeName { get; } = typeName;
 
     /// <summary>
     /// TypeNamespace (an index into the String heap)
     /// </summary>
-    public MetadataRecord TypeNamespace { get; } = typeNamespace;
+    public Metadata TypeNamespace { get; } = typeNamespace;
 
     /// <summary>
     /// Extends (an index into the TypeDef, TypeRef, or TypeSpec table; more precisely, a
     /// TypeDefOrRef (§II.24.2.6) coded index)
     /// </summary>
-    public MetadataRecord Extends { get; } = extends;
+    public Metadata Extends { get; } = extends;
 
     /// <summary>
     /// FieldList (an index into the Field table; it marks the first of a contiguous run of
@@ -123,7 +146,7 @@ public class TypeDef(
     /// - the next run of Fields, found by inspecting the FieldList of the next row
     ///   in this TypeDef table
     /// </summary>
-    public MetadataRecord FieldList { get; } = fieldList;
+    public Metadata FieldList { get; } = fieldList;
 
     /// <summary>
     /// MethodList (an index into the MethodDef table; it marks the first of a continguous
@@ -132,67 +155,67 @@ public class TypeDef(
     /// - the next run of Methods, found by inspecting the MethodList of the next
     ///   row in this TypeDef table
     /// </summary>
-    public MetadataRecord MethodList { get; } = methodList;
+    public Metadata MethodList { get; } = methodList;
 }
 
 /// <summary>
 /// II.22.26 MethodDef : 0x06
 /// </summary>
 public class MethodDef(
-    MetadataRecord rva,
-    MetadataRecord implFlags,
-    MetadataRecord flags,
-    MetadataRecord name,
-    MetadataRecord signature,
-    MetadataRecord paramList)
+    Metadata rva,
+    Metadata implFlags,
+    Metadata flags,
+    Metadata name,
+    Metadata signature,
+    Metadata paramList)
 {
     /// <summary>
     /// RVA (a 4-byte constant)
     /// </summary>
-    public MetadataRecord Rva { get; init; } = rva;
+    public Metadata Rva { get; init; } = rva;
 
     /// <summary>
     /// ImplFlags (a 2-byte bitmask of type MethodImplAttributes, §II.23.1.10)
     /// </summary>
-    public MetadataRecord ImplFlags { get; init; } = implFlags;
+    public Metadata ImplFlags { get; init; } = implFlags;
 
     /// <summary>
     /// Flags (a 2-byte bitmask of type MethodAttributes, §II.23.1.10)
     /// </summary>
     /// <returns></returns>
-    public MetadataRecord Flags { get; init; } = flags;
+    public Metadata Flags { get; init; } = flags;
 
     /// <summary>
     /// Name (an index into the String heap)
     /// </summary>
-    public MetadataRecord Name { get; init; } = name;
+    public Metadata Name { get; init; } = name;
 
     /// <summary>
     /// Signature (an index into the Blob heap)
     /// </summary>
     /// <returns></returns>
-    public MetadataRecord Signature { get; init; } = signature;
+    public Metadata Signature { get; init; } = signature;
 
-    public MetadataRecord ParamList { get; } = paramList;
+    public Metadata ParamList { get; } = paramList;
 }
 
 /// <summary>
 /// II.22.33 Param : 0x08
 /// </summary>
-public class Param(MetadataRecord flags, MetadataRecord sequence, MetadataRecord name)
+public class Param(Metadata flags, Metadata sequence, Metadata name)
 {
     /// <summary>
     /// Flags (a 2-byte bitmask of type ParamAttributes, §II.23.1.13)
     /// </summary>
-    public MetadataRecord Flags { get; } = flags;
+    public Metadata Flags { get; } = flags;
 
     /// <summary>
     /// Sequence (a 2-byte constant)
     /// </summary>
-    public MetadataRecord Sequence { get; } = sequence;
+    public Metadata Sequence { get; } = sequence;
 
     /// <summary>
     /// Name (an index into the String heap)
     /// </summary>
-    public MetadataRecord Name { get; } = name;
+    public Metadata Name { get; } = name;
 }
