@@ -19,6 +19,7 @@ public class Parser(string path)
     public PeOptionalHeader PeOptionalHeader = null!;
     public List<SectionHeader> SectionHeaders = [];
     public CliHeader CliHeader = null!;
+    public MetadataRoot MetadataRoot = null!;
 
     public MetadataModule Module = null!;
     public List<TypeRef> TyperefTable = [];
@@ -33,11 +34,11 @@ public class Parser(string path)
         ParseOptionalHeader();
         ParseSectionHeaders(PeFileHeader.NumberOfSections);
         ParseCliHeader();
-        _metadata.Add("metadata_root", ParseMetadataRoot());
+        ParseMetadataRoot();
 
-        var strings = _metadata["metadata_root"]["#Strings"];
-        var stringsOffset = strings.Children!["file_offset"].IntValue;
-        var stringsSize = strings.Children!["size"].IntValue;
+        var strings = MetadataRoot.StreamHeaders.First(x => x.Name.StringValue == "#Strings");
+        var stringsOffset = strings.FileOffset.IntValue;
+        var stringsSize = strings.Size.IntValue;
         var stringsBytes = FileBytes.Skip(stringsOffset).Take(stringsSize).ToArray();
 
         var metadata = new
@@ -244,21 +245,20 @@ public class Parser(string path)
     }
 
     // I.24.2.1 Metadata root 
-    private Dictionary<string, Metadata> ParseMetadataRoot()
+    private void ParseMetadataRoot()
     {
         var metadataRootRva = CliHeader.MetadataRva.IntValue;
         var metadataOffset = RvaToFileOffset(metadataRootRva);
 
         _cursor = metadataOffset;
 
-        var metadataRoot = new Dictionary<string, Metadata>()
-        {
-            { "signature", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "major_version", new Metadata(MetadataType.Short, _cursor, GetNext(2)) },
-            { "minor_version", new Metadata(MetadataType.Short, _cursor, GetNext(2)) },
-            { "reserved", new Metadata(MetadataType.Bytes, _cursor, GetNext(4)) },
-            { "version_length", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-        };
+        MetadataRoot = new MetadataRoot(
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Short, _cursor, GetNext(2)),
+            new Metadata(MetadataType.Short, _cursor, GetNext(2)),
+            new Metadata(MetadataType.Bytes, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4))
+        );
 
         // Read version string (null-terminated)
         var versionOffset = metadataOffset + 16;
@@ -272,29 +272,27 @@ public class Parser(string path)
 
         var versionBytes = FileBytes.Skip(versionOffset).Take(versionEndOffset - versionOffset).ToArray();
 
-        metadataRoot.Add("version_string", new Metadata(MetadataType.ByteText, versionOffset, versionBytes));
+        MetadataRoot.VersionString = new Metadata(MetadataType.ByteText, versionOffset, versionBytes);
 
         // Align to 4-byte boundary
         var offset = versionOffset + versionBytes.Length;
         offset = (offset + 3) & ~3;
         _cursor = offset;
 
-        metadataRoot.Add("flags", new Metadata(MetadataType.Bytes, _cursor, GetNext(2)));
-        metadataRoot.Add("number_of_streams", new Metadata(MetadataType.Short, _cursor, GetNext(2)));
+        MetadataRoot.Flags = new Metadata(MetadataType.Bytes, _cursor, GetNext(2));
+        MetadataRoot.NumberOfStreams = new Metadata(MetadataType.Short, _cursor, GetNext(2));
 
         if (_debug)
         {
-            Console.WriteLine($"CLR version {version}, Metadata streams: {metadataRoot["number_of_streams"].IntValue}");
+            Console.WriteLine($"CLR version {version}, Metadata streams: {MetadataRoot.NumberOfStreams.IntValue}");
         }
 
-        ParseMetadataStreamHeaders(metadataRoot, metadataRoot["number_of_streams"].ShortValue);
-
-        return metadataRoot;
+        ParseMetadataStreamHeaders(MetadataRoot);
     }
 
-    private void ParseMetadataStreamHeaders(Dictionary<string, Metadata> metadataRoot, int numberOfStreams)
+    private void ParseMetadataStreamHeaders(MetadataRoot metadataRoot)
     {
-        for (var i = 0; i < numberOfStreams; i++)
+        for (var i = 0; i < metadataRoot.NumberOfStreams.ShortValue; i++)
         {
             var streamOffsetBytes = GetNext(4);
             var streamSizeBytes = GetNext(4);
@@ -308,37 +306,33 @@ public class Parser(string path)
             }
 
             var nameBytes = GetNext(nameEndOffset - nameOffset);
-            var streamName = Encoding.ASCII.GetString(nameBytes);
             var index = _cursor - nameBytes.Length - 8;
-
             var fileOffset = RvaToFileOffset(CliHeader.MetadataRva.IntValue + BinaryPrimitives.ReadInt32LittleEndian(streamOffsetBytes));
-            metadataRoot
-                .Add($"{streamName}", new Metadata(MetadataType.Bytes, index, FileBytes.Skip(index).Take(8 + nameBytes.Length).ToArray(),
-                    new Dictionary<string, Metadata>
-                    {
-                        { "offset", new Metadata(MetadataType.Int, index, streamOffsetBytes) },
-                        { "size", new Metadata(MetadataType.Int, index + 4, streamSizeBytes) },
-                        { "name", new Metadata(MetadataType.ByteText, index + 4, nameBytes) },
-                        { "file_offset", new Metadata(MetadataType.Int, index + 4, BitConverter.GetBytes(fileOffset)) }
-                    }));
+
+            MetadataRoot.StreamHeaders.Add(new StreamHeader(
+                new Metadata(MetadataType.Int, index, streamOffsetBytes),
+                new Metadata(MetadataType.Int, index + 4, streamSizeBytes),
+                new Metadata(MetadataType.ByteText, index + 8, nameBytes),
+                new Metadata(MetadataType.Int, 0, BitConverter.GetBytes(fileOffset))
+            ));
 
             // Move to next stream header (align to 4-byte boundary)
             var offset = nameEndOffset + 1;
             _cursor = (offset + 3) & ~3;
         }
 
-        var tableStream = metadataRoot.FirstOrDefault(x => x.Key is "#~" or "#-").Value;
+        var newTableStream = MetadataRoot.StreamHeaders.FirstOrDefault(x => x.Name.StringValue == "#~");
 
-        if (tableStream is not null)
+        if (newTableStream is not null)
         {
-            ParseTablesHeader(tableStream);
+            ParseTablesHeader(newTableStream);
         }
     }
 
-    private void ParseTablesHeader(Metadata tableStream)
+    private void ParseTablesHeader(StreamHeader tableStreamHeader)
     {
         // II.24.2.6 #~ stream
-        var fileOffset = tableStream.Children!["file_offset"].IntValue;
+        var fileOffset = tableStreamHeader.FileOffset.IntValue;
         _cursor = fileOffset;
 
         var children = new Dictionary<string, Metadata>

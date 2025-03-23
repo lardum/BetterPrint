@@ -99,6 +99,27 @@ public record CliHeader(
     Metadata ManagedNativeHeaderSize
 );
 
+public class MetadataRoot(
+    Metadata Signature,
+    Metadata MajorVersion,
+    Metadata MinorVersion,
+    Metadata Reserved,
+    Metadata VisionLength
+)
+{
+    public Metadata Flags { get; set; } = null!;
+    public Metadata NumberOfStreams { get; set; } = null!;
+    public Metadata VersionString { get; set; } = null!;
+    public  List<StreamHeader> StreamHeaders { get; set; } = [];
+}
+
+public record StreamHeader(
+    Metadata Offset,
+    Metadata Size,
+    Metadata Name,
+    Metadata FileOffset
+);
+
 /// <summary>
 /// II.22.30 Module : 0x00
 /// </summary>
@@ -107,28 +128,28 @@ public class MetadataModule(Metadata generation, Metadata name, Metadata mvid, M
     /// <summary>
     /// Generation (a 2-byte value, reserved, shall be zero)
     /// </summary>
-    public Metadata Generation { get; init; } = generation;
+    public Metadata Generation { get; } = generation;
 
     /// <summary>
     /// Name (an index into the String heap)
     /// </summary>
-    public Metadata Name { get; init; } = name;
+    public Metadata Name { get; } = name;
 
     /// <summary>
     /// Mvid (an index into the Guid heap; simply a Guid used to distinguish between two
     /// versions of the same module)
     /// </summary>
-    public Metadata Mvid { get; init; } = mvid;
+    public Metadata Mvid { get; } = mvid;
 
     /// <summary>
     /// EncId (an index into the Guid heap; reserved, shall be zero)
     /// </summary>
-    public Metadata EncId { get; init; } = encId;
+    public Metadata EncId { get; } = encId;
 
     /// <summary>
     /// EncBaseId (an index into the Guid heap; reserved, shall be zero)
     /// </summary>
-    public Metadata EncBaseId { get; init; } = encBaseId;
+    public Metadata EncBaseId { get; } = encBaseId;
 
     /// <summary>
     /// 1. The Module table shall contain one and only one row [ERROR]
