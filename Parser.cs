@@ -11,66 +11,59 @@ public class Parser(string path)
 {
     private int _cursor;
     private readonly bool _debug = false;
-    private readonly Dictionary<string, Dictionary<string, Metadata>> _metadata = new();
+    private readonly byte[] _fileBytes = File.ReadAllBytes(path);
 
-    public readonly byte[] FileBytes = File.ReadAllBytes(path);
-    public DosHeader DosHeader = null!;
-    public PeFileHeader PeFileHeader = null!;
-    public PeOptionalHeader PeOptionalHeader = null!;
-    public List<SectionHeader> SectionHeaders = [];
-    public CliHeader CliHeader = null!;
-    public MetadataRoot MetadataRoot = null!;
-    public MetadataModule Module = null!;
-    public List<TypeRef> TyperefTable = [];
-    public List<TypeDef> TypeDefTable = [];
-    public List<MethodDef> MethodDefTable = [];
-    public List<Param> ParamTable = [];
+    private PeOptionalHeader _peOptionalHeader = null!;
+    private List<SectionHeader> _sectionHeaders = [];
+    private CliHeader _cliHeader = null!;
+    private MetadataRoot _metadataRoot = null!;
+    private MetadataModule _module = null!;
+    private readonly List<TypeRef> _typeRefTable = [];
+    private readonly List<TypeDef> _typeDefTable = [];
+    private readonly List<MethodDef> _methodDefTable = [];
+    private readonly List<Param> _paramTable = [];
 
-    public Dictionary<string, Dictionary<string, Metadata>> Parse()
+    private Metadata _numberOfSections = null!;
+
+    public PeFile Parse()
     {
-        ParseDosHeader();
-        ParsePeFileHeader();
-        ParseOptionalHeader();
-        ParseSectionHeaders(PeFileHeader.NumberOfSections);
-        ParseCliHeader();
-        ParseMetadataRoot();
+        var peFile = new PeFile(
+            _fileBytes,
+            ParseDosHeader(),
+            ParsePeFileHeader(),
+            ParseOptionalHeader(),
+            ParseSectionHeaders(),
+            ParseCliHeader(),
+            ParseMetadataRoot()
+        );
 
-        var strings = MetadataRoot.StreamHeaders.First(x => x.Name.StringValue == "#Strings");
+        ParseMetadataStreamHeaders();
+
+        peFile.Module = _module;
+        peFile.TypeRefTable = _typeRefTable;
+        peFile.TypeDefTable = _typeDefTable;
+        peFile.ParamTable = _paramTable;
+
+        var strings = _metadataRoot.StreamHeaders.First(x => x.Name.StringValue == "#Strings");
         var stringsOffset = strings.FileOffset.IntValue;
         var stringsSize = strings.Size.IntValue;
-        var stringsBytes = FileBytes.Skip(stringsOffset).Take(stringsSize).ToArray();
+        var stringsBytes = _fileBytes.Skip(stringsOffset).Take(stringsSize).ToArray();
 
-        var metadata = new
-        {
-            DosHeader,
-            PeFileHeader,
-            PeOptionalHeader,
-            SectionHeaders,
-            CliHeader,
-            MetadataRoot,
-            Module,
-            TyperefTable,
-            TypeDefTable,
-            MethodDefTable,
-            ParamTable
-        };
+        // File.WriteAllText("./metadata.json", JsonSerializer.Serialize(peFile, new JsonSerializerOptions { WriteIndented = true }));
 
-        // Console.WriteLine(JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
-        // File.WriteAllText("./metadata.json", JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
-
-        var codeSection = SectionHeaders.First(x => x.Name.StringValue.Trim('\0') == ".text");
+        var codeSection = _sectionHeaders.First(x => x.Name.StringValue.Trim('\0') == ".text");
 
         var virtualAddress = codeSection.VirtualAddress.IntValue;
         var pointerToRawData = codeSection.PointerToRawData.IntValue;
 
         var vm = new VirtualMachine(stringsBytes);
 
-        File.WriteAllText("./bytes.txt", BitConverter.ToString(FileBytes));
+        File.WriteAllText("./bytes.txt", BitConverter.ToString(_fileBytes));
 
-        foreach (var mdt in MethodDefTable)
+        foreach (var mdt in _methodDefTable)
         {
             var fileOffset = mdt.Rva.IntValue - virtualAddress + pointerToRawData;
-            var firstByte = FileBytes[fileOffset];
+            var firstByte = _fileBytes[fileOffset];
             var isTinyHeader = (firstByte & 0x3) == 0x2;
             var isFatHeader = (firstByte & 0x3) == 0x3;
 
@@ -84,17 +77,17 @@ public class Parser(string path)
 
             if (isFatHeader)
             {
-                codeSize = BinaryPrimitives.ReadInt32LittleEndian(FileBytes.AsSpan(codeOffset + 4));
+                codeSize = BinaryPrimitives.ReadInt32LittleEndian(_fileBytes.AsSpan(codeOffset + 4));
             }
 
             var methodEnd = codeOffset + codeSize;
 
-            vm.Execute(FileBytes.Skip(codeOffset).Take(methodEnd - codeOffset).ToArray());
+            vm.Execute(_fileBytes.Skip(codeOffset).Take(methodEnd - codeOffset).ToArray());
 
             break;
         }
 
-        return _metadata;
+        return peFile;
     }
 
     /// <summary>
@@ -105,7 +98,7 @@ public class Parser(string path)
     /// <exception cref="InvalidOperationException"></exception>
     private int RvaToFileOffset(int rva)
     {
-        foreach (var section in SectionHeaders)
+        foreach (var section in _sectionHeaders)
         {
             var virtualAddress = section.VirtualAddress.IntValue;
             if (rva >= virtualAddress && rva < virtualAddress + virtualAddress)
@@ -117,22 +110,24 @@ public class Parser(string path)
         throw new InvalidOperationException($"Could not convert RVA 0x{rva:X8} to file offset");
     }
 
-    private void ParseDosHeader()
+    private DosHeader ParseDosHeader()
     {
-        DosHeader = new DosHeader(new Metadata(MetadataType.ByteText, _cursor, GetNext(128)));
-        var peHeaderOffset = DosHeader.GetLfanew();
+        var dosHeader = new DosHeader(new Metadata(MetadataType.ByteText, _cursor, GetNext(128)));
+        var peHeaderOffset = dosHeader.GetLfanew();
 
         // Verify PE signature "PE\0\0"
-        if (FileBytes[peHeaderOffset] != 'P' || FileBytes[peHeaderOffset + 1] != 'E' ||
-            FileBytes[peHeaderOffset + 2] != 0 || FileBytes[peHeaderOffset + 3] != 0)
+        if (_fileBytes[peHeaderOffset] != 'P' || _fileBytes[peHeaderOffset + 1] != 'E' ||
+            _fileBytes[peHeaderOffset + 2] != 0 || _fileBytes[peHeaderOffset + 3] != 0)
         {
             throw new InvalidOperationException("Invalid PE signature");
         }
+
+        return dosHeader;
     }
 
-    private void ParsePeFileHeader()
+    private PeFileHeader ParsePeFileHeader()
     {
-        PeFileHeader = new PeFileHeader(
+        var peFileHeader = new PeFileHeader(
             new Metadata(MetadataType.ByteText, _cursor, GetNext(4)),
             new Metadata(MetadataType.Bytes, _cursor, GetNext(2)),
             new Metadata(MetadataType.Short, _cursor, GetNext(2)),
@@ -142,11 +137,15 @@ public class Parser(string path)
             new Metadata(MetadataType.Short, _cursor, GetNext(2)),
             new Metadata(MetadataType.Binary, _cursor, GetNext(2))
         );
+
+        _numberOfSections = peFileHeader.NumberOfSections;
+
+        return peFileHeader;
     }
 
-    private void ParseOptionalHeader()
+    private PeOptionalHeader ParseOptionalHeader()
     {
-        PeOptionalHeader = new PeOptionalHeader(
+        var peOptionalHeader = new PeOptionalHeader(
             new Metadata(MetadataType.Bytes, _cursor, GetNext(2)),
             new Metadata(MetadataType.Byte, _cursor, GetNext()),
             new Metadata(MetadataType.Byte, _cursor, GetNext()),
@@ -176,12 +175,18 @@ public class Parser(string path)
             new Metadata(MetadataType.Int, _cursor, GetNext(4)),
             new Metadata(MetadataType.Long, _cursor, GetNext(8))
         );
+
+        _peOptionalHeader = peOptionalHeader;
+
+        return peOptionalHeader;
     }
 
-    private void ParseSectionHeaders(Metadata numberOfSections)
+    private List<SectionHeader> ParseSectionHeaders()
     {
+        List<SectionHeader> sectionHeaders = [];
+
         int localCursor;
-        var numSections = numberOfSections.ShortValue;
+        var numSections = _numberOfSections.ShortValue;
 
         byte[] sectionBytes;
         for (var i = 0; i < numSections; i++)
@@ -204,7 +209,7 @@ public class Parser(string path)
                 new Metadata(MetadataType.Binary, index + localCursor, GetNextLocal(4))
             );
 
-            SectionHeaders.Add(sectionDetails);
+            sectionHeaders.Add(sectionDetails);
 
             if (_debug)
             {
@@ -213,7 +218,9 @@ public class Parser(string path)
             }
         }
 
-        return;
+        _sectionHeaders = sectionHeaders;
+
+        return sectionHeaders;
 
         byte[] GetNextLocal(int len = 1)
         {
@@ -223,13 +230,13 @@ public class Parser(string path)
         }
     }
 
-    private void ParseCliHeader()
+    private CliHeader ParseCliHeader()
     {
-        var clrHeaderRva = PeOptionalHeader.ClrRuntimeHeaderRva.IntValue;
+        var clrHeaderRva = _peOptionalHeader.ClrRuntimeHeaderRva.IntValue;
         var clrHeaderOffset = RvaToFileOffset(clrHeaderRva);
         _cursor = clrHeaderOffset;
 
-        CliHeader = new CliHeader(
+        var cliHeader = new CliHeader(
             new Metadata(MetadataType.Int, _cursor, GetNext(4)),
             new Metadata(MetadataType.Short, _cursor, GetNext(2)),
             new Metadata(MetadataType.Short, _cursor, GetNext(2)),
@@ -248,17 +255,21 @@ public class Parser(string path)
             new Metadata(MetadataType.Int, _cursor, GetNext(4)),
             new Metadata(MetadataType.Int, _cursor, GetNext(4))
         );
+
+        _cliHeader = cliHeader;
+
+        return cliHeader;
     }
 
     // I.24.2.1 Metadata root 
-    private void ParseMetadataRoot()
+    private MetadataRoot ParseMetadataRoot()
     {
-        var metadataRootRva = CliHeader.MetadataRva.IntValue;
+        var metadataRootRva = _cliHeader.MetadataRva.IntValue;
         var metadataOffset = RvaToFileOffset(metadataRootRva);
 
         _cursor = metadataOffset;
 
-        MetadataRoot = new MetadataRoot(
+        var metadataRoot = new MetadataRoot(
             new Metadata(MetadataType.Int, _cursor, GetNext(4)),
             new Metadata(MetadataType.Short, _cursor, GetNext(2)),
             new Metadata(MetadataType.Short, _cursor, GetNext(2)),
@@ -269,36 +280,37 @@ public class Parser(string path)
         // Read version string (null-terminated)
         var versionOffset = metadataOffset + 16;
         var versionEndOffset = versionOffset;
-        while (FileBytes[versionEndOffset] != 0 && versionEndOffset < FileBytes.Length)
+        while (_fileBytes[versionEndOffset] != 0 && versionEndOffset < _fileBytes.Length)
         {
             versionEndOffset++;
         }
 
-        var version = Encoding.ASCII.GetString(FileBytes, versionOffset, versionEndOffset - versionOffset);
+        var version = Encoding.ASCII.GetString(_fileBytes, versionOffset, versionEndOffset - versionOffset);
 
-        var versionBytes = FileBytes.Skip(versionOffset).Take(versionEndOffset - versionOffset).ToArray();
-
-        MetadataRoot.VersionString = new Metadata(MetadataType.ByteText, versionOffset, versionBytes);
+        var versionBytes = _fileBytes.Skip(versionOffset).Take(versionEndOffset - versionOffset).ToArray();
+        metadataRoot.VersionString = new Metadata(MetadataType.ByteText, versionOffset, versionBytes);
 
         // Align to 4-byte boundary
         var offset = versionOffset + versionBytes.Length;
         offset = (offset + 3) & ~3;
         _cursor = offset;
 
-        MetadataRoot.Flags = new Metadata(MetadataType.Bytes, _cursor, GetNext(2));
-        MetadataRoot.NumberOfStreams = new Metadata(MetadataType.Short, _cursor, GetNext(2));
+        metadataRoot.Flags = new Metadata(MetadataType.Bytes, _cursor, GetNext(2));
+        metadataRoot.NumberOfStreams = new Metadata(MetadataType.Short, _cursor, GetNext(2));
 
         if (_debug)
         {
-            Console.WriteLine($"CLR version {version}, Metadata streams: {MetadataRoot.NumberOfStreams.IntValue}");
+            Console.WriteLine($"CLR version {version}, Metadata streams: {metadataRoot.NumberOfStreams.IntValue}");
         }
 
-        ParseMetadataStreamHeaders(MetadataRoot);
+        _metadataRoot = metadataRoot;
+
+        return metadataRoot;
     }
 
-    private void ParseMetadataStreamHeaders(MetadataRoot metadataRoot)
+    private void ParseMetadataStreamHeaders()
     {
-        for (var i = 0; i < metadataRoot.NumberOfStreams.ShortValue; i++)
+        for (var i = 0; i < _metadataRoot.NumberOfStreams.ShortValue; i++)
         {
             var streamOffsetBytes = GetNext(4);
             var streamSizeBytes = GetNext(4);
@@ -306,16 +318,16 @@ public class Parser(string path)
             // Read stream name (null-terminated)
             var nameOffset = _cursor;
             var nameEndOffset = nameOffset;
-            while (FileBytes[nameEndOffset] != 0 && nameEndOffset < FileBytes.Length)
+            while (_fileBytes[nameEndOffset] != 0 && nameEndOffset < _fileBytes.Length)
             {
                 nameEndOffset++;
             }
 
             var nameBytes = GetNext(nameEndOffset - nameOffset);
             var index = _cursor - nameBytes.Length - 8;
-            var fileOffset = RvaToFileOffset(CliHeader.MetadataRva.IntValue + BinaryPrimitives.ReadInt32LittleEndian(streamOffsetBytes));
+            var fileOffset = RvaToFileOffset(_cliHeader.MetadataRva.IntValue + BinaryPrimitives.ReadInt32LittleEndian(streamOffsetBytes));
 
-            MetadataRoot.StreamHeaders.Add(new StreamHeader(
+            _metadataRoot.StreamHeaders.Add(new StreamHeader(
                 new Metadata(MetadataType.Int, index, streamOffsetBytes),
                 new Metadata(MetadataType.Int, index + 4, streamSizeBytes),
                 new Metadata(MetadataType.ByteText, index + 8, nameBytes),
@@ -327,7 +339,7 @@ public class Parser(string path)
             _cursor = (offset + 3) & ~3;
         }
 
-        var newTableStream = MetadataRoot.StreamHeaders.FirstOrDefault(x => x.Name.StringValue == "#~");
+        var newTableStream = _metadataRoot.StreamHeaders.FirstOrDefault(x => x.Name.StringValue == "#~");
 
         if (newTableStream is not null)
         {
@@ -351,7 +363,7 @@ public class Parser(string path)
             new Metadata(MetadataType.Long, _cursor, GetNext(8))
         );
 
-        MetadataRoot.TableStream = stream;
+        _metadataRoot.TableStream = stream;
 
         // Parse table row counts (for each bit set in validTables)
 
@@ -376,7 +388,7 @@ public class Parser(string path)
         // II.22.30 Module : 0x00 
         var stringHeapSize = GetHeapIndexSize("String");
         var guidHeapSize = GetHeapIndexSize("GUID");
-        Module = new MetadataModule
+        _module = new MetadataModule
         (
             new Metadata(MetadataType.Short, _cursor, GetNext(2)),
             new Metadata(stringHeapSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(stringHeapSize)),
@@ -396,7 +408,7 @@ public class Parser(string path)
             var typeName = new Metadata(stringHeapSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(stringHeapSize));
             var typeNamespace = new Metadata(stringHeapSize == 2 ? MetadataType.Short : MetadataType.Int, _cursor, GetNext(stringHeapSize));
 
-            TyperefTable.Add(new TypeRef(resolutionScope, typeName, typeNamespace));
+            _typeRefTable.Add(new TypeRef(resolutionScope, typeName, typeNamespace));
         }
 
         // II.22.37 TypeDef : 0x02
@@ -415,7 +427,7 @@ public class Parser(string path)
             // var methodList = new MetadataRecord(methodTableIndexSize == 2 ? TokenType.Short : TokenType.Int, _cursor, GetNext(methodTableIndexSize));
 
             // IDK
-            TypeDefTable.Add(new TypeDef(flags, typeName, typeNamespace, extends, fieldList, null!));
+            _typeDefTable.Add(new TypeDef(flags, typeName, typeNamespace, extends, fieldList, null!));
         }
 
         var blobHeapSize = GetHeapIndexSize("Blob");
@@ -436,7 +448,7 @@ public class Parser(string path)
                 GetNext(2) //GetTableIndexSize(0x08))
             );
 
-            MethodDefTable.Add(new MethodDef(rva, implFlags, flags, name, signature, paramList));
+            _methodDefTable.Add(new MethodDef(rva, implFlags, flags, name, signature, paramList));
         }
 
         // II.22.33 Param : 0x08
@@ -446,7 +458,7 @@ public class Parser(string path)
             var flags = new Metadata(MetadataType.Short, _cursor, GetNext(2));
             var sequence = new Metadata(MetadataType.Bytes, _cursor, GetNext(2));
             var name = new Metadata(MetadataType.Short, _cursor, GetNext(stringHeapSize));
-            ParamTable.Add(new Param(flags, sequence, name));
+            _paramTable.Add(new Param(flags, sequence, name));
         }
 
         return;
@@ -477,7 +489,7 @@ public class Parser(string path)
 
     private byte[] GetNext(int len = 1)
     {
-        var bts = FileBytes.Skip(_cursor).Take(len).ToArray();
+        var bts = _fileBytes.Skip(_cursor).Take(len).ToArray();
         _cursor += len;
         return bts;
     }

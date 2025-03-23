@@ -2,6 +2,23 @@
 
 namespace BetterPrint;
 
+public record PeFile(
+    byte[] FileByte,
+    DosHeader DosHeader,
+    PeFileHeader PeFileHeader,
+    PeOptionalHeader PeOptionalHeader,
+    List<SectionHeader> SectionHeaders,
+    CliHeader CliHeader,
+    MetadataRoot MetadataRoot
+)
+{
+    public MetadataModule Module = null!;
+    public List<TypeRef> TypeRefTable = [];
+    public List<TypeDef> TypeDefTable = [];
+    public List<MethodDef> MethodDefTable = [];
+    public List<Param> ParamTable = [];
+}
+
 /// <summary>
 /// II.25.2.1 MS-DOS header
 /// </summary>
