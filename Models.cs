@@ -4,10 +4,6 @@ namespace BetterPrint;
 
 /// <summary>
 /// II.25.2.1 MS-DOS header
-/// PE					2
-/// Start				58
-/// Lfanew				4
-/// End					64
 /// </summary>
 public class DosHeader(Metadata rawBytes)
 {
@@ -20,25 +16,49 @@ public class DosHeader(Metadata rawBytes)
 /// <summary>
 /// II.25.2.2 PE file header
 /// </summary>
-public class PeFileHeader(
-    Metadata peSignature,
-    Metadata machine,
-    Metadata numberOfSections,
-    Metadata timeDateStamp,
-    Metadata pointerToSymbolTable,
-    Metadata numberOfSymbols,
-    Metadata optionalHeaderSize,
-    Metadata characteristics)
-{
-    public Metadata PeSignature { get; } = peSignature;
-    public Metadata Machine { get; } = machine;
-    public Metadata NumberOfSections { get; } = numberOfSections;
-    public Metadata TimeDateStamp { get; } = timeDateStamp;
-    public Metadata PointerToSymbolTable { get; } = pointerToSymbolTable;
-    public Metadata NumberOfSymbols { get; } = numberOfSymbols;
-    public Metadata OptionalHeaderSize { get; } = optionalHeaderSize;
-    public Metadata Characteristics { get; } = characteristics;
-}
+public record PeFileHeader(
+    Metadata PeSignature,
+    Metadata Machine,
+    Metadata NumberOfSections,
+    Metadata TimeDateStamp,
+    Metadata PointerToSymbolTable,
+    Metadata NumberOfSymbols,
+    Metadata OptionalHeaderSize,
+    Metadata Characteristics
+);
+
+/// <summary>
+/// II.25.2.3 PE optional header
+/// </summary>
+public record PeOptionalHeader(
+    Metadata Magic,
+    Metadata MajorLinkerVersion,
+    Metadata MinorLinkerVersion,
+    Metadata SizeOfCode,
+    Metadata SizeOfInitializedData,
+    Metadata SizeofUnInitializedData,
+    Metadata EntryPointRva,
+    Metadata BaseOfCode,
+    Metadata BaseOfData,
+    Metadata NtFields, // II.25.2.3.2 PE header Windows NT-specific fields
+    Metadata ExportTable,
+    Metadata ImportTable,
+    Metadata ResourceTable,
+    Metadata ExceptionTable,
+    Metadata CertificateTable,
+    Metadata BaseRelocationTable,
+    Metadata Debug,
+    Metadata Copyright,
+    Metadata GlobalPtr,
+    Metadata TlsTable,
+    Metadata LoadConfigTable,
+    Metadata BoundImport,
+    Metadata Iat,
+    Metadata DelayImportDescriptor,
+    Metadata ClrRuntimeHeaderRva,
+    Metadata ClrRuntimeHeaderSize,
+    Metadata Reserved
+);
 
 /// <summary>
 /// II.22.30 Module : 0x00

@@ -9,13 +9,15 @@ namespace BetterPrint;
 // https://github.com/mono/mono/blob/0f53e9e151d92944cacab3e24ac359410c606df6/tools/pedump/pedump.c#L49
 public class Parser(string path)
 {
-    public readonly byte[] FileBytes = File.ReadAllBytes(path);
     private int _cursor;
     private readonly bool _debug = false;
     private readonly Dictionary<string, Dictionary<string, Metadata>> _metadata = new();
 
+    public readonly byte[] FileBytes = File.ReadAllBytes(path);
     public DosHeader DosHeader = null!;
     public PeFileHeader PeFileHeader = null!;
+    public PeOptionalHeader PeOptionalHeader = null!;
+
     public MetadataModule Module = null!;
     public List<TypeRef> TyperefTable = [];
     public List<TypeDef> TypeDefTable = [];
@@ -26,15 +28,10 @@ public class Parser(string path)
     {
         ParseDosHeader();
         ParsePeFileHeader();
-        _metadata.Add("optional_header", ParseOptionalHeader());
+        ParseOptionalHeader();
         _metadata.Add("sections", ParseSectionHeaders(PeFileHeader.NumberOfSections));
         _metadata.Add("cli_header", ParseCliHeader());
         _metadata.Add("metadata_root", ParseMetadataRoot());
-
-        if (_debug)
-        {
-            PrintDebug(_metadata);
-        }
 
         var strings = _metadata["metadata_root"]["#Strings"];
         var stringsOffset = strings.Children!["file_offset"].IntValue;
@@ -138,40 +135,38 @@ public class Parser(string path)
         );
     }
 
-    private Dictionary<string, Metadata> ParseOptionalHeader()
+    private void ParseOptionalHeader()
     {
-        var optionalHeader = new Dictionary<string, Metadata>
-        {
-            { "magic", new Metadata(MetadataType.Bytes, _cursor, GetNext(2)) },
-            { "major_linker_version", new Metadata(MetadataType.Byte, _cursor, GetNext()) }, // Should be 6 but is 48?
-            { "minor_linker_version", new Metadata(MetadataType.Byte, _cursor, GetNext()) },
-            { "size_of_code", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "size_of_initialized_data", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "size_of_uninitialized_data", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "entry_point_rva", new Metadata(MetadataType.Bytes, _cursor, GetNext(4)) },
-            { "base_of_code", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "base_of_data", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "nt_fields", new Metadata(MetadataType.Bytes, _cursor, GetNext(68)) }, // II.25.2.3.3 Pe header data directories
-            { "export_table", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "import_table", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "resource_table", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "exception_table", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "certificate_table", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "base_relocation_table", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "debug", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "copyright", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "global_ptr", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "tls_table", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "load_config_table", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "bound_import", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "iat", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "delay_import_descriptor", new Metadata(MetadataType.Long, _cursor, GetNext(8)) },
-            { "clr_runtime_header_rva", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "clr_runtime_header_size", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "reserved", new Metadata(MetadataType.Long, _cursor, GetNext(8)) }
-        };
-
-        return optionalHeader;
+        PeOptionalHeader = new PeOptionalHeader(
+            new Metadata(MetadataType.Bytes, _cursor, GetNext(2)),
+            new Metadata(MetadataType.Byte, _cursor, GetNext()),
+            new Metadata(MetadataType.Byte, _cursor, GetNext()),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Bytes, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            // II.25.2.3.2 PE header Windows NT-specific fields
+            new Metadata(MetadataType.Bytes, _cursor, GetNext(68)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Long, _cursor, GetNext(8))
+        );
     }
 
     private Dictionary<string, Metadata> ParseSectionHeaders(Metadata numberOfSections)
@@ -225,7 +220,7 @@ public class Parser(string path)
 
     private Dictionary<string, Metadata> ParseCliHeader()
     {
-        var clrHeaderRva = _metadata["optional_header"]["clr_runtime_header_rva"].IntValue;
+        var clrHeaderRva = PeOptionalHeader.ClrRuntimeHeaderRva.IntValue;
         var clrHeaderOffset = RvaToFileOffset(clrHeaderRva);
         _cursor = clrHeaderOffset;
 
@@ -490,13 +485,6 @@ public class Parser(string path)
         var bts = FileBytes.Skip(_cursor).Take(len).ToArray();
         _cursor += len;
         return bts;
-    }
-
-    private void PrintDebug(Dictionary<string, Dictionary<string, Metadata>> parsedIl)
-    {
-        Console.WriteLine(string.Join(", ",
-            Consts.ParseFlags(PeFileHeader.Characteristics.Value, Consts.PeFileHeaderCharacteristics)));
-        Console.WriteLine(JsonSerializer.Serialize(parsedIl, new JsonSerializerOptions { WriteIndented = true }));
     }
 }
 
