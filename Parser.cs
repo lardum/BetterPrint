@@ -18,6 +18,7 @@ public class Parser(string path)
     public PeFileHeader PeFileHeader = null!;
     public PeOptionalHeader PeOptionalHeader = null!;
     public List<SectionHeader> SectionHeaders = [];
+    public CliHeader CliHeader = null!;
 
     public MetadataModule Module = null!;
     public List<TypeRef> TyperefTable = [];
@@ -31,7 +32,7 @@ public class Parser(string path)
         ParsePeFileHeader();
         ParseOptionalHeader();
         ParseSectionHeaders(PeFileHeader.NumberOfSections);
-        _metadata.Add("cli_header", ParseCliHeader());
+        ParseCliHeader();
         _metadata.Add("metadata_root", ParseMetadataRoot());
 
         var strings = _metadata["metadata_root"]["#Strings"];
@@ -215,40 +216,37 @@ public class Parser(string path)
         }
     }
 
-    private Dictionary<string, Metadata> ParseCliHeader()
+    private void ParseCliHeader()
     {
         var clrHeaderRva = PeOptionalHeader.ClrRuntimeHeaderRva.IntValue;
         var clrHeaderOffset = RvaToFileOffset(clrHeaderRva);
         _cursor = clrHeaderOffset;
 
-        var cliHeader = new Dictionary<string, Metadata>
-        {
-            { "size_of_header", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "major_runtime_version", new Metadata(MetadataType.Short, _cursor, GetNext(2)) },
-            { "minor_runtime_version", new Metadata(MetadataType.Short, _cursor, GetNext(2)) },
-            { "metadata_rva", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "metadata_size", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "flags", new Metadata(MetadataType.Bytes, _cursor, GetNext(4)) },
-            { "entry_point_token", new Metadata(MetadataType.Bytes, _cursor, GetNext(4)) },
-            { "resources_rva", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "resources_size", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "strong_name_signature_rva", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "strong_name_signature_size", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "code_manager_table_rva", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "code_manager_table_size", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "export_address_table_jumps_rva", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "export_address_table_jumps_size", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "managed_native_header_rva", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-            { "managed_native_header_size", new Metadata(MetadataType.Int, _cursor, GetNext(4)) },
-        };
-
-        return cliHeader;
+        CliHeader = new CliHeader(
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Short, _cursor, GetNext(2)),
+            new Metadata(MetadataType.Short, _cursor, GetNext(2)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Bytes, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Bytes, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4)),
+            new Metadata(MetadataType.Int, _cursor, GetNext(4))
+        );
     }
 
     // I.24.2.1 Metadata root 
     private Dictionary<string, Metadata> ParseMetadataRoot()
     {
-        var metadataRootRva = _metadata["cli_header"]["metadata_rva"].IntValue;
+        var metadataRootRva = CliHeader.MetadataRva.IntValue;
         var metadataOffset = RvaToFileOffset(metadataRootRva);
 
         _cursor = metadataOffset;
@@ -313,8 +311,7 @@ public class Parser(string path)
             var streamName = Encoding.ASCII.GetString(nameBytes);
             var index = _cursor - nameBytes.Length - 8;
 
-            var fileOffset =
-                RvaToFileOffset(_metadata["cli_header"]["metadata_rva"].IntValue + BinaryPrimitives.ReadInt32LittleEndian(streamOffsetBytes));
+            var fileOffset = RvaToFileOffset(CliHeader.MetadataRva.IntValue + BinaryPrimitives.ReadInt32LittleEndian(streamOffsetBytes));
             metadataRoot
                 .Add($"{streamName}", new Metadata(MetadataType.Bytes, index, FileBytes.Skip(index).Take(8 + nameBytes.Length).ToArray(),
                     new Dictionary<string, Metadata>

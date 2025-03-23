@@ -77,6 +77,29 @@ public record SectionHeader(
 );
 
 /// <summary>
+/// II.25.3.3 CLI header
+/// </summary>
+public record CliHeader(
+    Metadata SizeOfHeader,
+    Metadata MajorRuntimeVersion,
+    Metadata MinorRuntimeVersion,
+    Metadata MetadataRva,
+    Metadata MetadataSize,
+    Metadata Flags,
+    Metadata EntryPointToken,
+    Metadata ResourcesRva,
+    Metadata ResourcesSize,
+    Metadata StrongNameSignatureRva,
+    Metadata StrongNameSignatureSize,
+    Metadata CodeManagerTableRva,
+    Metadata CodeManagerTableSize,
+    Metadata ExportAddressTableJumpsRva,
+    Metadata ExportAddressTableJumpsSize,
+    Metadata ManagedNativeHeaderRva,
+    Metadata ManagedNativeHeaderSize
+);
+
+/// <summary>
 /// II.22.30 Module : 0x00
 /// </summary>
 public class MetadataModule(Metadata generation, Metadata name, Metadata mvid, Metadata encId, Metadata encBaseId)
