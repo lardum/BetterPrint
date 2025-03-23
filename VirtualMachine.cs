@@ -46,7 +46,7 @@ public class VirtualMachine
                     var table = BinaryPrimitives.ReadUInt32LittleEndian(_bytecode.Skip(cursor).Take(4).ToArray());
                     var tableIndex = (int)(table & 0x00FFFFFF);
                     var tableType = GetTokenType((int)(table >> 24));
-                    var stringValue = ReadStringAt((uint)tableIndex); // fix index
+                    var stringValue = ReadStringAt2((uint)tableIndex); // fix index
                     Console.WriteLine($"ldstr, {table} and string value: {stringValue}");
                     cursor += 4;
                     break;
@@ -68,8 +68,9 @@ public class VirtualMachine
 
     private TokenType GetTokenType(int token) => (TokenType)(token & 0xff000000);
 
-    protected virtual string ReadStringAt(uint index)
+    protected virtual string ReadStringAt2(uint index)
     {
+        Console.WriteLine(_strings.Length);
         int length = 0;
         int start = (int)index;
 
@@ -82,6 +83,48 @@ public class VirtualMachine
         }
 
         return Encoding.UTF8.GetString(_strings, start, length);
+    }
+
+    protected virtual string ReadStringAt(uint index)
+    {
+        int start = (int)index;
+
+        uint length = (uint)(ReadCompressedUInt32(_strings, ref start) & ~1);
+        if (length < 1)
+            return string.Empty;
+
+        var chars = new char [length / 2];
+
+        for (int i = start, j = 0; i < start + length; i += 2)
+            chars[j++] = (char)(_strings[i] | (_strings[i + 1] << 8));
+
+        return new string(chars);
+    }
+
+    public static uint ReadCompressedUInt32(byte[] data, ref int position)
+    {
+        uint integer;
+        if ((data[position] & 0x80) == 0)
+        {
+            integer = data[position];
+            position++;
+        }
+        else if ((data[position] & 0x40) == 0)
+        {
+            integer = (uint)(data[position] & ~0x80) << 8;
+            integer |= data[position + 1];
+            position += 2;
+        }
+        else
+        {
+            integer = (uint)(data[position] & ~0xc0) << 24;
+            integer |= (uint)data[position + 1] << 16;
+            integer |= (uint)data[position + 2] << 8;
+            integer |= (uint)data[position + 3];
+            position += 4;
+        }
+
+        return integer;
     }
 }
 

@@ -36,7 +36,7 @@ public class Parser(string path)
 
         var strings = _metadata["metadata_root"]["#Strings"];
         var stringsOffset = strings.Children!["file_offset"].IntValue;
-        var stringsSize = strings.Children!["file_offset"].IntValue;
+        var stringsSize = strings.Children!["size"].IntValue;
         var stringsBytes = FileBytes.Skip(stringsOffset).Take(stringsSize).ToArray();
 
         // var tables = new
