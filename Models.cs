@@ -61,6 +61,22 @@ public record PeOptionalHeader(
 );
 
 /// <summary>
+/// II.25.3 Section headers
+/// </summary>
+public record SectionHeader(
+    Metadata Name,
+    Metadata VirtualSize,
+    Metadata VirtualAddress,
+    Metadata SizeOfRawData,
+    Metadata PointerToRawData,
+    Metadata PointerToRelocations,
+    Metadata PointerToLineNumbers,
+    Metadata NumberOfRelocations,
+    Metadata NumberOfLineNumbers,
+    Metadata Characteristics
+);
+
+/// <summary>
 /// II.22.30 Module : 0x00
 /// </summary>
 public class MetadataModule(Metadata generation, Metadata name, Metadata mvid, Metadata encId, Metadata encBaseId)

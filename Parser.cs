@@ -17,6 +17,7 @@ public class Parser(string path)
     public DosHeader DosHeader = null!;
     public PeFileHeader PeFileHeader = null!;
     public PeOptionalHeader PeOptionalHeader = null!;
+    public List<SectionHeader> SectionHeaders = [];
 
     public MetadataModule Module = null!;
     public List<TypeRef> TyperefTable = [];
@@ -29,7 +30,7 @@ public class Parser(string path)
         ParseDosHeader();
         ParsePeFileHeader();
         ParseOptionalHeader();
-        _metadata.Add("sections", ParseSectionHeaders(PeFileHeader.NumberOfSections));
+        ParseSectionHeaders(PeFileHeader.NumberOfSections);
         _metadata.Add("cli_header", ParseCliHeader());
         _metadata.Add("metadata_root", ParseMetadataRoot());
 
@@ -49,10 +50,10 @@ public class Parser(string path)
         };
         // Console.WriteLine(JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
 
-        var codeSection = _metadata["sections"][".text"];
+        var codeSection = SectionHeaders.First(x => x.Name.StringValue.Trim('\0') == ".text");
 
-        var virtualAddress = codeSection.Children!["virtual_address"].IntValue;
-        var pointerToRawData = codeSection.Children!["pointer_to_raw_data"].IntValue;
+        var virtualAddress = codeSection.VirtualAddress.IntValue;
+        var pointerToRawData = codeSection.PointerToRawData.IntValue;
 
         var vm = new VirtualMachine(stringsBytes);
 
@@ -96,12 +97,12 @@ public class Parser(string path)
     /// <exception cref="InvalidOperationException"></exception>
     private int RvaToFileOffset(int rva)
     {
-        foreach (var section in _metadata["sections"])
+        foreach (var section in SectionHeaders)
         {
-            var virtualAddress = section.Value.Children!["virtual_address"].IntValue;
+            var virtualAddress = section.VirtualAddress.IntValue;
             if (rva >= virtualAddress && rva < virtualAddress + virtualAddress)
             {
-                return section.Value.Children["pointer_to_raw_data"].IntValue + (rva - virtualAddress);
+                return section.PointerToRawData.IntValue + (rva - virtualAddress);
             }
         }
 
@@ -169,10 +170,9 @@ public class Parser(string path)
         );
     }
 
-    private Dictionary<string, Metadata> ParseSectionHeaders(Metadata numberOfSections)
+    private void ParseSectionHeaders(Metadata numberOfSections)
     {
-        var localCursor = 0;
-        var sectionHeaders = new Dictionary<string, Metadata>();
+        int localCursor;
         var numSections = numberOfSections.ShortValue;
 
         byte[] sectionBytes;
@@ -182,33 +182,30 @@ public class Parser(string path)
             var index = _cursor;
             sectionBytes = GetNext(40);
             var nameBytes = GetNextLocal(8);
-            var sectionName = Encoding.ASCII.GetString(sectionBytes[..8]).Trim('\0');
 
-            var sectionDetails = new Dictionary<string, Metadata>
-            {
-                { "name", new Metadata(MetadataType.ByteText, index + localCursor - 8, nameBytes) },
-                { "virtual_size", new Metadata(MetadataType.Int, index + localCursor, GetNextLocal(4)) },
-                { "virtual_address", new Metadata(MetadataType.Int, index + localCursor, GetNextLocal(4)) },
-                { "size_of_raw_data", new Metadata(MetadataType.Int, index + localCursor, GetNextLocal(4)) },
-                { "pointer_to_raw_data", new Metadata(MetadataType.Int, index + localCursor, GetNextLocal(4)) },
-                { "pointer_to_relocations", new Metadata(MetadataType.Int, index + localCursor, GetNextLocal(4)) },
-                { "pointer_to_linenumbers", new Metadata(MetadataType.Int, index + localCursor, GetNextLocal(4)) },
-                { "number_of_relocations", new Metadata(MetadataType.Short, index + localCursor, GetNextLocal(2)) },
-                { "number_of_linenumbers", new Metadata(MetadataType.Short, index + localCursor, GetNextLocal(2)) },
-                { "characteristics", new Metadata(MetadataType.Binary, index + localCursor, GetNextLocal(4)) }
-            };
+            var sectionDetails = new SectionHeader(
+                new Metadata(MetadataType.ByteText, index + localCursor - 8, nameBytes),
+                new Metadata(MetadataType.Int, index + localCursor, GetNextLocal(4)),
+                new Metadata(MetadataType.Int, index + localCursor, GetNextLocal(4)),
+                new Metadata(MetadataType.Int, index + localCursor, GetNextLocal(4)),
+                new Metadata(MetadataType.Int, index + localCursor, GetNextLocal(4)),
+                new Metadata(MetadataType.Int, index + localCursor, GetNextLocal(4)),
+                new Metadata(MetadataType.Int, index + localCursor, GetNextLocal(4)),
+                new Metadata(MetadataType.Short, index + localCursor, GetNextLocal(2)),
+                new Metadata(MetadataType.Short, index + localCursor, GetNextLocal(2)),
+                new Metadata(MetadataType.Binary, index + localCursor, GetNextLocal(4))
+            );
+
+            SectionHeaders.Add(sectionDetails);
 
             if (_debug)
             {
-                var characteristics = sectionDetails["characteristics"];
-                var flags = Consts.ParseFlags(characteristics.Value, Consts.SectionHeaderCharacteristics);
+                var flags = Consts.ParseFlags(sectionDetails.Characteristics.Value, Consts.SectionHeaderCharacteristics);
                 Console.WriteLine(string.Join(", ", flags));
             }
-
-            sectionHeaders.Add(sectionName, new Metadata(MetadataType.Bytes, _cursor, sectionBytes, sectionDetails));
         }
 
-        return sectionHeaders;
+        return;
 
         byte[] GetNextLocal(int len = 1)
         {
