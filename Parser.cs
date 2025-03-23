@@ -14,6 +14,7 @@ public class Parser(string path)
     private readonly bool _debug = false;
     private readonly Dictionary<string, Dictionary<string, MetadataRecord>> _metadata = new();
 
+    private DosHeader DosHeader = null!;
     private MetadataModule Module = null!;
     private List<TypeRef> TyperefTable = [];
     private List<TypeDef> TypeDefTable = [];
@@ -22,7 +23,7 @@ public class Parser(string path)
 
     public Dictionary<string, Dictionary<string, MetadataRecord>> Parse()
     {
-        _metadata.Add(Consts.PeParts.DosHeader, ParseDosHeader());
+        ParseDosHeader();
         _metadata.Add("pe_file_header", ParsePeFileHeader());
         _metadata.Add("optional_header", ParseOptionalHeader());
         _metadata.Add("sections", ParseSectionHeaders(_metadata["pe_file_header"]["number_of_sections"]));
@@ -39,15 +40,16 @@ public class Parser(string path)
         var stringsSize = strings.Children!["size"].IntValue;
         var stringsBytes = FileBytes.Skip(stringsOffset).Take(stringsSize).ToArray();
 
-        // var tables = new
-        // {
-        //     Module,
-        //     TyperefTable,
-        //     TypeDefTable,
-        //     MethodDefTable,
-        //     ParamTable
-        // };
-        // Console.WriteLine(JsonSerializer.Serialize(tables, new JsonSerializerOptions { WriteIndented = true }));
+        var metadata = new
+        {
+            DosHeader,
+            Module,
+            TyperefTable,
+            TypeDefTable,
+            MethodDefTable,
+            ParamTable
+        };
+        // Console.WriteLine(JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
 
         var codeSection = _metadata["sections"][".text"];
 
@@ -108,17 +110,10 @@ public class Parser(string path)
         throw new InvalidOperationException($"Could not convert RVA 0x{rva:X8} to file offset");
     }
 
-    private Dictionary<string, MetadataRecord> ParseDosHeader()
+    private void ParseDosHeader()
     {
-        return new Dictionary<string, MetadataRecord>
-        {
-            { Consts.PeParts.DosHeader, new MetadataRecord(MetadataType.ByteText, _cursor, GetNext(128)) }
-        };
-    }
-
-    private Dictionary<string, MetadataRecord> ParsePeFileHeader()
-    {
-        var peHeaderOffset = BinaryPrimitives.ReadUInt32LittleEndian(FileBytes.Skip(60).Take(4).ToArray());
+        DosHeader = new DosHeader(new MetadataRecord(MetadataType.ByteText, _cursor, GetNext(128)));
+        var peHeaderOffset = DosHeader.GetLfanew();
 
         // Verify PE signature "PE\0\0"
         if (FileBytes[peHeaderOffset] != 'P' || FileBytes[peHeaderOffset + 1] != 'E' ||
@@ -126,7 +121,10 @@ public class Parser(string path)
         {
             throw new InvalidOperationException("Invalid PE signature");
         }
+    }
 
+    private Dictionary<string, MetadataRecord> ParsePeFileHeader()
+    {
         var peFileHeader = new Dictionary<string, MetadataRecord>
         {
             { "pe_signature", new MetadataRecord(MetadataType.ByteText, _cursor, GetNext(4)) },

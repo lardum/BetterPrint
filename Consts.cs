@@ -4,11 +4,6 @@ namespace BetterPrint;
 
 static class Consts
 {
-    public class PeParts
-    {
-        public const string DosHeader = "dos_header";
-    }
-
     public static List<(string name, uint value)> PeFileHeaderCharacteristics =
     [
         ("IMAGE_FILE_RELOCS_STRIPPED", 0x0001), // Shall be zero 

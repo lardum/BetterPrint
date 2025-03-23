@@ -1,4 +1,21 @@
-﻿namespace BetterPrint;
+﻿using System.Buffers.Binary;
+
+namespace BetterPrint;
+
+/// <summary>
+/// II.25.2.1 MS-DOS header
+/// PE					2
+/// Start				58
+/// Lfanew				4
+/// End					64
+/// </summary>
+public class DosHeader(MetadataRecord rawBytes)
+{
+    public MetadataRecord RawBytes { get; } = rawBytes;
+
+    public uint GetLfanew()
+        => BinaryPrimitives.ReadUInt32LittleEndian(RawBytes.Value.Skip(60).Take(4).ToArray());
+}
 
 /// <summary>
 /// II.22.30 Module : 0x00
