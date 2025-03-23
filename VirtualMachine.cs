@@ -9,6 +9,7 @@ namespace BetterPrint;
 public class VirtualMachine
 {
     private readonly byte[] _strings = [];
+    private readonly int _stringHeapOffset;
 
     public VirtualMachine(byte[] strings)
     {
@@ -46,7 +47,7 @@ public class VirtualMachine
                     var table = BinaryPrimitives.ReadUInt32LittleEndian(_bytecode.Skip(cursor).Take(4).ToArray());
                     var tableIndex = (int)(table & 0x00FFFFFF);
                     var tableType = GetTokenType((int)(table >> 24));
-                    var stringValue = ReadStringAt2((uint)tableIndex); // fix index
+                    var stringValue = GetStringValue(tableIndex); // ReadStringAt2((uint)tableIndex); // fix index
                     Console.WriteLine($"ldstr, {table} and string value: {stringValue}");
                     cursor += 4;
                     break;
@@ -64,6 +65,30 @@ public class VirtualMachine
             cursor++;
             return res;
         }
+    }
+
+    private string GetStringValue(int tableIndex)
+    {
+        // if (_strings == null)
+        // {
+        //     return "Strings Heap Metadata not available";
+        // }
+
+        var stringsHeapOffset = _stringHeapOffset;
+        var stringOffset = stringsHeapOffset + tableIndex;
+
+        // Find the length of the string
+        var length = 0;
+        var currentOffset = stringOffset;
+        while (_strings[currentOffset] != 0)
+        {
+            length++;
+            currentOffset++;
+        }
+
+        // Extract the string
+        var stringBytes = _strings.Skip(stringOffset).Take(length).ToArray();
+        return Encoding.UTF8.GetString(stringBytes);
     }
 
     private TokenType GetTokenType(int token) => (TokenType)(token & 0xff000000);

@@ -104,7 +104,7 @@ public class MetadataRoot(
     Metadata MajorVersion,
     Metadata MinorVersion,
     Metadata Reserved,
-    Metadata VisionLength
+    Metadata VersionLength
 )
 {
     public Metadata Flags { get; set; } = null!;
