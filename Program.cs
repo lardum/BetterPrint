@@ -7,4 +7,6 @@ const string path = @"./HelloWorld.dll";
 // ExtractIlBytes.Extract(path);
 
 var parser = new Parser(path);
-var metadata = parser.Parse();
+var peFile = parser.Parse();
+var vm = new VirtualMachine(peFile);
+vm.Run();

@@ -8,17 +8,57 @@ namespace BetterPrint;
 // https://en.wikipedia.org/wiki/List_of_CIL_instructions
 public class VirtualMachine
 {
-    private readonly byte[] _strings = [];
-    private readonly int _stringHeapOffset;
+    private readonly PeFile _peFile;
+    private readonly byte[] _bytecode;
+    private readonly byte[] _strings;
 
-    public VirtualMachine(byte[] strings)
+    public VirtualMachine(PeFile peFile)
     {
-        _strings = strings;
+        _peFile = peFile;
+        _bytecode = peFile.FileByte;
+
+        var strings = _peFile.MetadataRoot.StreamHeaders.First(x => x.Name.StringValue == "#Strings");
+        var stringsOffset = strings.FileOffset.IntValue;
+        var stringsSize = strings.Size.IntValue;
+        _strings = _bytecode.Skip(stringsOffset).Take(stringsSize).ToArray();
     }
 
-    private byte[] _bytecode = [];
+    public void Run()
+    {
+        var codeSection = _peFile.SectionHeaders.First(x => x.Name.StringValue.Trim('\0') == ".text");
 
-    public void Execute(byte[] code)
+        var virtualAddress = codeSection.VirtualAddress.IntValue;
+        var pointerToRawData = codeSection.PointerToRawData.IntValue;
+
+        foreach (var mdt in _peFile.MethodDefTable)
+        {
+            var fileOffset = mdt.Rva.IntValue - virtualAddress + pointerToRawData;
+            var firstByte = _bytecode[fileOffset];
+            var isTinyHeader = (firstByte & 0x3) == 0x2;
+            var isFatHeader = (firstByte & 0x3) == 0x3;
+
+            var codeSize = 0;
+            if (isTinyHeader)
+            {
+                codeSize = (firstByte >> 2); // Upper 6 bits store size
+            }
+
+            var codeOffset = fileOffset + 1;
+
+            if (isFatHeader)
+            {
+                codeSize = BinaryPrimitives.ReadInt32LittleEndian(_bytecode.AsSpan(codeOffset + 4));
+            }
+
+            var methodEnd = codeOffset + codeSize;
+
+            Execute(_bytecode.Skip(codeOffset).Take(methodEnd - codeOffset).ToArray());
+
+            break;
+        }
+    }
+
+    private void Execute(byte[] code)
     {
         // For hello world:
         // 00-72-01-00-00-70-28-0D-00-00-0A-00-2A
@@ -32,10 +72,9 @@ public class VirtualMachine
 
         Console.WriteLine($"Len: {code.Length} | " + BitConverter.ToString(code));
 
-        _bytecode = code;
         var cursor = 0;
 
-        while (cursor < _bytecode.Length)
+        while (cursor < code.Length)
         {
             var opcode = GetNext();
 
@@ -44,10 +83,10 @@ public class VirtualMachine
                 case 0x00:
                     break;
                 case 0x72:
-                    var table = BinaryPrimitives.ReadUInt32LittleEndian(_bytecode.Skip(cursor).Take(4).ToArray());
+                    var table = BinaryPrimitives.ReadUInt32LittleEndian(code.Skip(cursor).Take(4).ToArray());
                     var tableIndex = (int)(table & 0x00FFFFFF);
                     var tableType = GetTokenType((int)(table >> 24));
-                    var stringValue = GetStringValue(tableIndex); // ReadStringAt2((uint)tableIndex); // fix index
+                    var stringValue = GetStringValue(tableIndex);
                     Console.WriteLine($"ldstr, {table} and string value: {stringValue}");
                     cursor += 4;
                     break;
@@ -61,7 +100,7 @@ public class VirtualMachine
 
         byte GetNext()
         {
-            var res = _bytecode.Skip(cursor).Take(1).First();
+            var res = code.Skip(cursor).Take(1).First();
             cursor++;
             return res;
         }
@@ -69,88 +108,10 @@ public class VirtualMachine
 
     private string GetStringValue(int tableIndex)
     {
-        // if (_strings == null)
-        // {
-        //     return "Strings Heap Metadata not available";
-        // }
-
-        var stringsHeapOffset = _stringHeapOffset;
-        var stringOffset = stringsHeapOffset + tableIndex;
-
-        // Find the length of the string
-        var length = 0;
-        var currentOffset = stringOffset;
-        while (_strings[currentOffset] != 0)
-        {
-            length++;
-            currentOffset++;
-        }
-
-        // Extract the string
-        var stringBytes = _strings.Skip(stringOffset).Take(length).ToArray();
-        return Encoding.UTF8.GetString(stringBytes);
+        return string.Empty;
     }
 
     private TokenType GetTokenType(int token) => (TokenType)(token & 0xff000000);
-
-    protected virtual string ReadStringAt2(uint index)
-    {
-        Console.WriteLine(_strings.Length);
-        int length = 0;
-        int start = (int)index;
-
-        for (int i = start;; i++)
-        {
-            if (_strings[i] == 0)
-                break;
-
-            length++;
-        }
-
-        return Encoding.UTF8.GetString(_strings, start, length);
-    }
-
-    protected virtual string ReadStringAt(uint index)
-    {
-        int start = (int)index;
-
-        uint length = (uint)(ReadCompressedUInt32(_strings, ref start) & ~1);
-        if (length < 1)
-            return string.Empty;
-
-        var chars = new char [length / 2];
-
-        for (int i = start, j = 0; i < start + length; i += 2)
-            chars[j++] = (char)(_strings[i] | (_strings[i + 1] << 8));
-
-        return new string(chars);
-    }
-
-    public static uint ReadCompressedUInt32(byte[] data, ref int position)
-    {
-        uint integer;
-        if ((data[position] & 0x80) == 0)
-        {
-            integer = data[position];
-            position++;
-        }
-        else if ((data[position] & 0x40) == 0)
-        {
-            integer = (uint)(data[position] & ~0x80) << 8;
-            integer |= data[position + 1];
-            position += 2;
-        }
-        else
-        {
-            integer = (uint)(data[position] & ~0xc0) << 24;
-            integer |= (uint)data[position + 1] << 16;
-            integer |= (uint)data[position + 2] << 8;
-            integer |= (uint)data[position + 3];
-            position += 4;
-        }
-
-        return integer;
-    }
 }
 
 public enum TokenType : uint

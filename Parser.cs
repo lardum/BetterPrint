@@ -42,50 +42,8 @@ public class Parser(string path)
         peFile.Module = _module;
         peFile.TypeRefTable = _typeRefTable;
         peFile.TypeDefTable = _typeDefTable;
+        peFile.MethodDefTable = _methodDefTable;
         peFile.ParamTable = _paramTable;
-
-        var strings = _metadataRoot.StreamHeaders.First(x => x.Name.StringValue == "#Strings");
-        var stringsOffset = strings.FileOffset.IntValue;
-        var stringsSize = strings.Size.IntValue;
-        var stringsBytes = _fileBytes.Skip(stringsOffset).Take(stringsSize).ToArray();
-
-        // File.WriteAllText("./metadata.json", JsonSerializer.Serialize(peFile, new JsonSerializerOptions { WriteIndented = true }));
-
-        var codeSection = _sectionHeaders.First(x => x.Name.StringValue.Trim('\0') == ".text");
-
-        var virtualAddress = codeSection.VirtualAddress.IntValue;
-        var pointerToRawData = codeSection.PointerToRawData.IntValue;
-
-        var vm = new VirtualMachine(stringsBytes);
-
-        File.WriteAllText("./bytes.txt", BitConverter.ToString(_fileBytes));
-
-        foreach (var mdt in _methodDefTable)
-        {
-            var fileOffset = mdt.Rva.IntValue - virtualAddress + pointerToRawData;
-            var firstByte = _fileBytes[fileOffset];
-            var isTinyHeader = (firstByte & 0x3) == 0x2;
-            var isFatHeader = (firstByte & 0x3) == 0x3;
-
-            var codeSize = 0;
-            if (isTinyHeader)
-            {
-                codeSize = (firstByte >> 2); // Upper 6 bits store size
-            }
-
-            var codeOffset = fileOffset + 1;
-
-            if (isFatHeader)
-            {
-                codeSize = BinaryPrimitives.ReadInt32LittleEndian(_fileBytes.AsSpan(codeOffset + 4));
-            }
-
-            var methodEnd = codeOffset + codeSize;
-
-            vm.Execute(_fileBytes.Skip(codeOffset).Take(methodEnd - codeOffset).ToArray());
-
-            break;
-        }
 
         return peFile;
     }
