@@ -69,7 +69,7 @@ public class VirtualMachine
         // 00 -> nop
         // 2A -> ret (return) 
 
-        Console.WriteLine($"Len: {code.Length} | " + BitConverter.ToString(code));
+        // Console.WriteLine($"Len: {code.Length} | " + BitConverter.ToString(code));
 
         var cursor = 0;
 
@@ -82,11 +82,11 @@ public class VirtualMachine
                 case 0x00:
                     break;
                 case 0x72:
-                    var table = BinaryPrimitives.ReadUInt32LittleEndian(code.Skip(cursor).Take(4).ToArray());
-                    var tableIndex = (table & 0x00FFFFFF);
-                    var tableType = GetTokenType((int)(table >> 24));
+                    var token = BinaryPrimitives.ReadUInt32LittleEndian(code.Skip(cursor).Take(4).ToArray());
+                    var tableIndex = (token & 0x00FFFFFF);
+                    var tableType = GetTokenType((int)(token >> 24));
                     var stringValue = ReadStringAt(tableIndex);
-                    Console.WriteLine($"ldstr, {table} and string value: {stringValue} which is now secured");
+                    Console.WriteLine($"ldstr, token: {token}, string value: {stringValue} which is now secured!");
                     cursor += 4;
                     break;
                 default:
