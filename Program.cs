@@ -3,7 +3,6 @@
 using BetterPrint;
 
 const string path = @"./HelloWorld.dll";
-// ExtractIlBytes.Extract(path);
 
 var parser = new Parser(path);
 var peFile = parser.Parse();
