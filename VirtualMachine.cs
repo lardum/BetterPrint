@@ -85,7 +85,7 @@ public class VirtualMachine
                 case 0x72:
                     var table = BinaryPrimitives.ReadUInt32LittleEndian(code.Skip(cursor).Take(4).ToArray());
                     var tableIndex = (int)(table & 0x00FFFFFF);
-                    var tableType = GetTokenType((int)(table >> 24));
+                    var tableType = GetTokenType((int)(table >> 24)); // strings
                     var stringValue = GetStringValue(tableIndex);
                     Console.WriteLine($"ldstr, {table} and string value: {stringValue}");
                     cursor += 4;
@@ -106,9 +106,31 @@ public class VirtualMachine
         }
     }
 
-    private string GetStringValue(int tableIndex)
+    private string GetStringValue(int index)
     {
-        return string.Empty;
+        List<int> stringStarts = [];
+        var currentStart = 0;
+        var len = _strings.Length;
+
+        while (currentStart < len)
+        {
+            if (_strings[currentStart] == 0)
+            {
+                stringStarts.Add(currentStart);
+            }
+
+            currentStart++;
+        }
+
+        var startIndex = stringStarts[index] + 1;
+        var endIndex = stringStarts[index + 1];
+
+        if (startIndex >= len || endIndex > len || startIndex > endIndex)
+        {
+            return string.Empty;
+        }
+
+        return Encoding.UTF8.GetString(_strings, startIndex, endIndex - startIndex);
     }
 
     private TokenType GetTokenType(int token) => (TokenType)(token & 0xff000000);

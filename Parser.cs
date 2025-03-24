@@ -171,7 +171,7 @@ public class Parser(string path)
 
             if (_debug)
             {
-                var flags = Consts.ParseFlags(sectionDetails.Characteristics.Value, Consts.SectionHeaderCharacteristics);
+                var flags = Flags.ParseFlags(sectionDetails.Characteristics.Value, Flags.SectionHeaderCharacteristics);
                 Console.WriteLine(string.Join(", ", flags));
             }
         }

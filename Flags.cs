@@ -2,7 +2,7 @@
 
 namespace BetterPrint;
 
-static class Consts
+static class Flags
 {
     public static List<(string name, uint value)> PeFileHeaderCharacteristics =
     [
