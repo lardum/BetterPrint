@@ -18,7 +18,7 @@ public class VirtualMachine
         _peFile = peFile;
         _bytecode = peFile.FileBytes;
 
-        var strings = _peFile.MetadataRoot.StreamHeaders.First(x => x.Name.StringValue == "#Strings");
+        var strings = _peFile.MetadataRoot.StreamHeaders.First(x => x.Name.StringValue == "#US");
         _stringsOffset = strings.FileOffset.IntValue;
         var stringsSize = strings.Size.IntValue;
         _strings = _bytecode.Skip(_stringsOffset).Take(stringsSize).ToArray();
@@ -83,9 +83,9 @@ public class VirtualMachine
                     break;
                 case 0x72:
                     var table = BinaryPrimitives.ReadUInt32LittleEndian(code.Skip(cursor).Take(4).ToArray());
-                    var tableIndex = (int)(table & 0x00FFFFFF);
-                    var tableType = GetTokenType((int)(table >> 24)); // strings
-                    var stringValue = GetStringValue(tableIndex);
+                    var tableIndex = (table & 0x00FFFFFF);
+                    var tableType = GetTokenType((int)(table >> 24));
+                    var stringValue = ReadStringAt(tableIndex);
                     Console.WriteLine($"ldstr, {table} and string value: {stringValue} which is now secured");
                     cursor += 4;
                     break;
@@ -105,45 +105,53 @@ public class VirtualMachine
         }
     }
 
-    private string GetStringValue(int index)
+    private string ReadStringAt(uint index)
     {
-        List<int> stringStarts = [];
-        var currentStart = 0;
-        var len = _strings.Length;
+        var start = (int)index;
 
-        while (currentStart < len)
-        {
-            if (_strings[currentStart] == 0)
-            {
-                stringStarts.Add(currentStart);
-            }
-
-            currentStart++;
-        }
-
-        var startIndex = stringStarts[index] + 1;
-        var endIndex = stringStarts[index + 1];
-
-        if (startIndex >= len || endIndex > len || startIndex > endIndex)
-        {
+        var length = (uint)(ReadCompressedUInt32(ref start) & ~1);
+        if (length < 1)
             return string.Empty;
+
+        var chars = new char [length / 2];
+
+        for (int i = start, j = 0; i < start + length; i += 2)
+            chars[j++] = (char)(_strings[i] | (_strings[i + 1] << 8));
+
+        return new string(chars);
+    }
+
+    private uint ReadCompressedUInt32(ref int position)
+    {
+        uint integer;
+        if ((_strings[position] & 0x80) == 0)
+        {
+            integer = _strings[position];
+            position++;
+        }
+        else if ((_strings[position] & 0x40) == 0)
+        {
+            integer = (uint)(_strings[position] & ~0x80) << 8;
+            integer |= _strings[position + 1];
+            position += 2;
+        }
+        else
+        {
+            integer = (uint)(_strings[position] & ~0xc0) << 24;
+            integer |= (uint)_strings[position + 1] << 16;
+            integer |= (uint)_strings[position + 2] << 8;
+            integer |= (uint)_strings[position + 3];
+            position += 4;
         }
 
-        // idk the hello world string is in blob not in #string heap
-        SecureStringBytes(startIndex + _stringsOffset, endIndex + _stringsOffset);
-
-        return Encoding.UTF8.GetString(_strings, startIndex, endIndex - startIndex);
+        return integer;
     }
 
     private void SecureStringBytes(int startIndex, int endIndex)
     {
         for (var i = startIndex + 2; i < endIndex; i++)
         {
-            var b = _peFile.FileBytes[i];
-            if (b != 0)
-            {
-                _peFile.FileBytes[i] = 0x41; // A
-            }
+            _peFile.FileBytes[i] = 0x41; // A
         }
     }
 
