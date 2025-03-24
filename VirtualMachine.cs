@@ -86,7 +86,7 @@ public class VirtualMachine
                     var tableIndex = (int)(table & 0x00FFFFFF);
                     var tableType = GetTokenType((int)(table >> 24)); // strings
                     var stringValue = GetStringValue(tableIndex);
-                    Console.WriteLine($"ldstr, {table} and string value: {stringValue}");
+                    Console.WriteLine($"ldstr, {table} and string value: {stringValue} which is now secured");
                     cursor += 4;
                     break;
                 default:
@@ -129,18 +129,15 @@ public class VirtualMachine
             return string.Empty;
         }
 
+        // idk the hello world string is in blob not in #string heap
+        SecureStringBytes(startIndex + _stringsOffset, endIndex + _stringsOffset);
 
-        var stringVale = Encoding.UTF8.GetString(_strings, startIndex, endIndex - startIndex);
-
-        // not working xd - these are not the strings
-        // SecureStringBytes(startIndex + _stringsOffset, endIndex + _stringsOffset);
-
-        return stringVale;
+        return Encoding.UTF8.GetString(_strings, startIndex, endIndex - startIndex);
     }
 
     private void SecureStringBytes(int startIndex, int endIndex)
     {
-        for (var i = startIndex; i < endIndex; i++)
+        for (var i = startIndex + 2; i < endIndex; i++)
         {
             var b = _peFile.FileBytes[i];
             if (b != 0)

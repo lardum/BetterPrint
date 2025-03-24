@@ -14,7 +14,6 @@ vm.Run();
 SecureStrings();
 return;
 
-Console.WriteLine(BitConverter.ToString(peFile.FileBytes.Skip(1178).Take(100).ToArray()));
 File.WriteAllBytes("./ExampleProgram/HelloWorld.dll", peFile.FileBytes);
 
 return;
@@ -31,7 +30,7 @@ void SecureStrings()
     // Console.WriteLine(Encoding.UTF8.GetString(newFile.Skip(stringsOffset).Take(stringsSize).ToArray()));
     // return;
 
-    for (var i = stringsOffset; i < stringsOffset + stringsSize; i++)
+    for (var i = stringsOffset + 2; i < stringsOffset + stringsSize; i++)
     {
         // var b = newFile[i];
         // if (b != 0)
