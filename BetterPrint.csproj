@@ -8,13 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Update="HelloWorld.dll">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+      <PackageReference Include="Mono.Cecil" Version="0.11.6" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Mono.Cecil" Version="0.11.6" />
+      <None Update="Misc\HelloWorld.dll">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

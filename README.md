@@ -4,9 +4,13 @@ This project was a personal learning experience focused on PE file parsing and b
 the context of .NET DLLs.
 Its basically useless but it was fun.
 
-Process:
+### Process:
 
 - parsing PE file according to ECMA-335 specification
 - interpreting extracted bytecode to list all strings that are loaded from #US heap
 - replacing all bytes in #US heap with letters A to "secure" all strings
 - saving new secured .dll
+
+### How to run:
+
+Use `dotnet run` command in root directory:

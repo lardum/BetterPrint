@@ -1,8 +1,7 @@
-﻿namespace BetterPrint;
-
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
-using System;
+
+namespace BetterPrint.Misc;
 
 public class ExtractIlBytes
 {

@@ -2,7 +2,7 @@
 
 using BetterPrint;
 
-const string path = @"./HelloWorld.dll";
+const string path = @"./Misc/HelloWorld.dll";
 
 var parser = new Parser(path);
 var peFile = parser.Parse();

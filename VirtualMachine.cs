@@ -86,7 +86,7 @@ public class VirtualMachine
                     var tableIndex = (token & 0x00FFFFFF);
                     var tableType = GetTokenType((int)(token >> 24));
                     var stringValue = ReadStringAt(tableIndex);
-                    Console.WriteLine($"ldstr, token: {token}, string value: {stringValue} which is now secured!");
+                    Console.WriteLine($"Detected ldstr operation for token: {token}, Securing loaded value: '{stringValue}'!");
                     cursor += 4;
                     break;
                 default:
