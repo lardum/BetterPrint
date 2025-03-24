@@ -11,6 +11,8 @@ Its basically useless but it was fun.
 - replacing all bytes in #US heap with letters A to "secure" all strings
 - saving new secured .dll
 
-### How to run:
+### How to run this thing on Windows:
 
-Use `dotnet run` command in root directory:
+- run `.\ExampleProgram\HelloWorld.exe` to see the original "Hello World!" output.
+- then execute the program `dotnet run`
+- run again `.\ExampleProgram\HelloWorld.exe` to see that now the dll have secured strings heap
