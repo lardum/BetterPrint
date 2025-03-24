@@ -11,16 +11,17 @@ public class VirtualMachine
     private readonly PeFile _peFile;
     private readonly byte[] _bytecode;
     private readonly byte[] _strings;
+    private readonly int _stringsOffset;
 
     public VirtualMachine(PeFile peFile)
     {
         _peFile = peFile;
-        _bytecode = peFile.FileByte;
+        _bytecode = peFile.FileBytes;
 
         var strings = _peFile.MetadataRoot.StreamHeaders.First(x => x.Name.StringValue == "#Strings");
-        var stringsOffset = strings.FileOffset.IntValue;
+        _stringsOffset = strings.FileOffset.IntValue;
         var stringsSize = strings.Size.IntValue;
-        _strings = _bytecode.Skip(stringsOffset).Take(stringsSize).ToArray();
+        _strings = _bytecode.Skip(_stringsOffset).Take(stringsSize).ToArray();
     }
 
     public void Run()
@@ -52,13 +53,11 @@ public class VirtualMachine
 
             var methodEnd = codeOffset + codeSize;
 
-            Execute(_bytecode.Skip(codeOffset).Take(methodEnd - codeOffset).ToArray());
-
-            break;
+            SecureStrings(_bytecode.Skip(codeOffset).Take(methodEnd - codeOffset).ToArray());
         }
     }
 
-    private void Execute(byte[] code)
+    private void SecureStrings(byte[] code)
     {
         // For hello world:
         // 00-72-01-00-00-70-28-0D-00-00-0A-00-2A
@@ -91,7 +90,7 @@ public class VirtualMachine
                     cursor += 4;
                     break;
                 default:
-                    Console.WriteLine($"Unknown opcode {opcode:X2}");
+                    // Console.WriteLine($"Unknown opcode {opcode:X2}");
                     break;
             }
         }
@@ -130,7 +129,25 @@ public class VirtualMachine
             return string.Empty;
         }
 
-        return Encoding.UTF8.GetString(_strings, startIndex, endIndex - startIndex);
+
+        var stringVale = Encoding.UTF8.GetString(_strings, startIndex, endIndex - startIndex);
+
+        // not working xd - these are not the strings
+        // SecureStringBytes(startIndex + _stringsOffset, endIndex + _stringsOffset);
+
+        return stringVale;
+    }
+
+    private void SecureStringBytes(int startIndex, int endIndex)
+    {
+        for (var i = startIndex; i < endIndex; i++)
+        {
+            var b = _peFile.FileBytes[i];
+            if (b != 0)
+            {
+                _peFile.FileBytes[i] = 0x41; // A
+            }
+        }
     }
 
     private TokenType GetTokenType(int token) => (TokenType)(token & 0xff000000);

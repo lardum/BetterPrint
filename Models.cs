@@ -3,7 +3,7 @@
 namespace BetterPrint;
 
 public record PeFile(
-    byte[] FileByte,
+    byte[] FileBytes,
     DosHeader DosHeader,
     PeFileHeader PeFileHeader,
     PeOptionalHeader PeOptionalHeader,
