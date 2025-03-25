@@ -45,6 +45,11 @@ public class Parser(string path)
         peFile.MethodDefTable = _methodDefTable;
         peFile.ParamTable = _paramTable;
 
+        if (Environment.GetCommandLineArgs().Any(x => x == "save-metadata"))
+        {
+            File.WriteAllText("./Misc/metadata.json", JsonSerializer.Serialize(peFile, new JsonSerializerOptions { WriteIndented = true }));
+        }
+
         return peFile;
     }
 
