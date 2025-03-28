@@ -53,12 +53,6 @@ public class Parser(string path)
         return peFile;
     }
 
-    /// <summary>
-    /// Where is this logic in the docks?
-    /// </summary>
-    /// <param name="rva"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
     private int RvaToFileOffset(int rva)
     {
         foreach (var section in _sectionHeaders)
@@ -260,6 +254,8 @@ public class Parser(string path)
 
         metadataRoot.Flags = new Metadata(MetadataType.Bytes, _cursor, GetNext(2));
         metadataRoot.NumberOfStreams = new Metadata(MetadataType.Short, _cursor, GetNext(2));
+
+        Console.WriteLine(_cursor);
 
         if (_debug)
         {

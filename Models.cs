@@ -116,6 +116,7 @@ public record CliHeader(
     Metadata ManagedNativeHeaderSize
 );
 
+// I.24.2.1 Metadata root
 public class MetadataRoot(
     Metadata Signature,
     Metadata MajorVersion,
@@ -135,6 +136,7 @@ public class MetadataRoot(
     public Stream TableStream { get; set; } = null!;
 }
 
+// II.24.2.2 Stream header
 public record StreamHeader(
     Metadata Offset,
     Metadata Size,
